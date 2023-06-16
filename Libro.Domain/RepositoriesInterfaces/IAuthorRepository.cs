@@ -12,7 +12,7 @@ namespace Libro.Domain.Interfaces
         Task<IEnumerable<Author>> GetAllAuthorsAsync();
         Task<Author> GetAuthorByIdAsync(int authorId);
 
-        Task<Author> CreateAuthorAsync(Author author);
+        Task<bool> CreateAuthorAsync(Author author);
         Task<Author> UpdateAuthorAsync(int authorId, Author authorDTO);
         Task<bool> DeleteAuthorAsync(int authorId);
     }

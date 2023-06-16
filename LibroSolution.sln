@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libro.Domain", "Libro.Domai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libro.Application", "Libro.Application\Libro.Application.csproj", "{17E7F599-0E6A-4B36-9DA1-AAFA89AD9B87}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libro.Infrastructure", "Libro.Infrastructure\Libro.Infrastructure.csproj", "{320D2FF9-8A49-4BB8-A8EF-186C7E8F7576}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{17E7F599-0E6A-4B36-9DA1-AAFA89AD9B87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17E7F599-0E6A-4B36-9DA1-AAFA89AD9B87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17E7F599-0E6A-4B36-9DA1-AAFA89AD9B87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{320D2FF9-8A49-4BB8-A8EF-186C7E8F7576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{320D2FF9-8A49-4BB8-A8EF-186C7E8F7576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{320D2FF9-8A49-4BB8-A8EF-186C7E8F7576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{320D2FF9-8A49-4BB8-A8EF-186C7E8F7576}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
