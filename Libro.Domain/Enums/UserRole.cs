@@ -8,8 +8,8 @@ namespace Libro.Domain.Enums
 {
     public enum UserRole
     {
-        Adminstrator,
-        Librarian,
-        Patron
+        Administrator = 0,
+        Librarian = 1,
+        Patron = 2
     }
 }

@@ -29,7 +29,7 @@ namespace Libro.Application.Services
         }
         public async Task<AuthorDTO> GetAuthorByIdAsync(int authorId)
         {
-            var author = await GetAuthorByIdAsync(authorId);
+            var author = await _authorRepository.GetAuthorByIdAsync(authorId);
             var authorDTO = _mapper.Map<AuthorDTO>(author);
 
             return authorDTO;
