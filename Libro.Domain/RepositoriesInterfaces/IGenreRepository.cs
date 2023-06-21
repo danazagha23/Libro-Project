@@ -9,6 +9,7 @@ namespace Libro.Domain.Interfaces
 {
     public interface IGenreRepository
     {
+        Task<IEnumerable<Genre>> GetAllGenresAsync();
         Task<IEnumerable<Book>> GetBooksByGenreAsync(int genreId);
     }
 }

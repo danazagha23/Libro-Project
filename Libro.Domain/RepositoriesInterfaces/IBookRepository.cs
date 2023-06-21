@@ -15,5 +15,7 @@ namespace Libro.Domain.Interfaces
         Task<bool> CreateBookAsync(Book book);
         Task<Book> UpdateBookAsync(int bookId, Book book);
         Task<bool> DeleteBookAsync(int bookId);
+
+        Task<List<Book>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus);
     }
 }

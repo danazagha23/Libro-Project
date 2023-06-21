@@ -36,19 +36,50 @@ namespace Libro.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Books",
-                columns: new[] { "BookId", "AuthorId", "AvailabilityStatus", "Description", "GenreId", "PublicationDate", "Title" },
+                columns: new[] { "BookId", "AvailabilityStatus", "Description", "GenreId", "PublicationDate", "Title" },
                 values: new object[,]
                 {
-                    { 1, 1, 0, "The first book in the Harry Potter series.", 1, new DateTime(1997, 6, 26, 0, 0, 0, 0, DateTimeKind.Unspecified), "Harry Potter and the Sorcerer's Stone" },
-                    { 2, 2, 0, "The first book in the A Song of Ice and Fire series.", 1, new DateTime(1996, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A Game of Thrones" },
-                    { 3, 3, 0, "A classic detective novel featuring Hercule Poirot.", 2, new DateTime(1934, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Murder on the Orient Express" },
-                    { 4, 4, 0, "A horror novel set in an isolated hotel.", 3, new DateTime(1977, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "The Shining" }
+                    { 1, 0, "The first book in the Harry Potter series.", 1, new DateTime(1997, 6, 26, 0, 0, 0, 0, DateTimeKind.Unspecified), "Harry Potter and the Sorcerer's Stone" },
+                    { 2, 0, "The first book in the A Song of Ice and Fire series.", 1, new DateTime(1996, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A Game of Thrones" },
+                    { 3, 0, "A classic detective novel featuring Hercule Poirot.", 2, new DateTime(1934, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Murder on the Orient Express" },
+                    { 4, 0, "A horror novel set in an isolated hotel.", 3, new DateTime(1977, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "The Shining" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "BookAuthors",
+                columns: new[] { "Id", "AuthorId", "BookId" },
+                values: new object[,]
+                {
+                    { 1, 1, 1 },
+                    { 2, 2, 2 },
+                    { 3, 3, 3 },
+                    { 4, 4, 4 }
                 });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DeleteData(
+                table: "BookAuthors",
+                keyColumn: "Id",
+                keyValue: 1);
+
+            migrationBuilder.DeleteData(
+                table: "BookAuthors",
+                keyColumn: "Id",
+                keyValue: 2);
+
+            migrationBuilder.DeleteData(
+                table: "BookAuthors",
+                keyColumn: "Id",
+                keyValue: 3);
+
+            migrationBuilder.DeleteData(
+                table: "BookAuthors",
+                keyColumn: "Id",
+                keyValue: 4);
+
             migrationBuilder.DeleteData(
                 table: "Authors",
                 keyColumn: "AuthorId",

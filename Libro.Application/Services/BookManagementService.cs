@@ -5,9 +5,11 @@ using Libro.Domain.Entities;
 using Libro.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Libro.Application.Services
 {
@@ -52,6 +54,13 @@ namespace Libro.Application.Services
         public async Task<bool> DeleteBookAsync(int bookId)
         {
             return await _bookRepository.DeleteBookAsync(bookId);
+        }
+
+        public async Task<List<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)
+        {
+            var searchResults = await _bookRepository.FindBooksAsync(bookGenre, searchString, authorName, availabilityStatus);
+
+            return _mapper.Map<IEnumerable<BookDTO>>(searchResults).ToList();
         }
     }
 }

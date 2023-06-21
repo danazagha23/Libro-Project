@@ -17,7 +17,10 @@ namespace Libro.Infrastructure.Data.Repositories
         {
             _context = context;
         }
-
+        public async Task<IEnumerable<Genre>> GetAllGenresAsync()
+        {
+            return await _context.Genres.ToListAsync();
+        }
         public async Task<IEnumerable<Book>> GetBooksByGenreAsync(int genreId)
         {
             return await _context.Books.Where(id => id.GenreId == genreId).ToListAsync();

@@ -1,14 +1,9 @@
-﻿using Libro.Domain.Entities;
+﻿using Libro.Application.DTOs;
 using Libro.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Libro.Application.DTOs
+namespace Libro.Presentation.Models
 {
-    public class BookDTO
+    public class BookDetailsViewModel
     {
         public int BookId { get; set; }
         public string Title { get; set; }

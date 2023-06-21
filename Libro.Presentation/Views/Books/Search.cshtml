@@ -1,0 +1,141 @@
+﻿@model SearchViewModel
+
+@{
+    ViewData["Title"] = "Books";
+}
+
+<div class="container">
+    <h1>Books</h1>
+
+    <form asp-controller="Books" asp-action="Search" method="get">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="bookGenre">Genre:</label>
+                    <select id="bookGenre" name="bookGenre" class="form-control">
+                        <option value="" selected>Choose genre</option>
+                        @foreach (string item in Model.Genres)
+                        {
+                            <option value="@item">@item</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="searchString">Title:</label>
+                    <input type="text" list="bookTitles" id="searchString" name="searchString" class="form-control" value="@Model.SearchString" placeholder="Enter or select a book title" />
+                    <datalist id="bookTitles">
+                        @foreach (var book in Model.AllBooks.Take(50))
+                        {
+                            <option value="@book.Title">@book.Title</option>
+                        }
+                    </datalist>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="authorName">Author:</label>
+                    <input type="text" list="authorNames" id="authorName" name="authorName" class="form-control" value="@Model.AuthorName" placeholder="Enter or select an author name" />
+                    <datalist id="authorNames">
+                        @foreach (var author in Model.AllAuthors.Take(50))
+                        {
+                            <option value="@author.AuthorName">@author.AuthorName</option>
+                        }
+                    </datalist>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="availabilityStatus">Availability:</label>
+                    <select id="availabilityStatus" name="availabilityStatus" class="form-control">
+                        <option value="">Any</option>
+                        <option value="Available">Available</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <hr />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.FilteredBooks)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Genre.Name)</td>
+                    <td>
+                        @foreach (var bookAuthor in item.BookAuthors)
+                        {
+                            @Html.DisplayFor(modelItem => bookAuthor.Author.AuthorName)
+                            @if (!bookAuthor.Equals(item.BookAuthors.Last()))
+                            {
+                                @:", "
+                            }
+                        }
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.AvailabilityStatus)</td>
+                    <td>
+                        <a href="@Url.Action("Details", "Books", new { id = item.BookId })" class="btn btn-primary">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Search", new { page = Model.PageNumber - 1 , bookGenre = Model.BookGenre, searchString = Model.SearchString, authorName = Model.AuthorName, availabilityStatus = Model.AvailabilityStatus })">Previous</a>
+                </li>
+            }
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Search", new { page = i, bookGenre = Model.BookGenre, searchString = Model.SearchString, authorName = Model.AuthorName, availabilityStatus = Model.AvailabilityStatus })">@i</a>
+
+                </li>
+            }
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Search", new { page = Model.PageNumber + 1 , bookGenre = Model.BookGenre, searchString = Model.SearchString, authorName = Model.AuthorName, availabilityStatus = Model.AvailabilityStatus })">Next</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+
+<script>
+    // Set the selected values after filtration
+    var selectedGenre = "@Model.BookGenre";
+    var selectedAvailabilityStatus = "@Model.AvailabilityStatus";
+
+    document.getElementById("bookGenre").value = selectedGenre;
+    document.getElementById("availabilityStatus").value = selectedAvailabilityStatus;
+
+    function clearFilters() {
+        document.getElementById("bookGenre").value = "";
+        document.getElementById("searchString").value = "";
+        document.getElementById("authorName").value = "";
+        document.getElementById("availabilityStatus").value = "";
+    }
+</script>

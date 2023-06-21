@@ -1,0 +1,40 @@
+﻿@model BookDetailsViewModel
+
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<div class="container">
+    <h1>Book Details</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@Model.Title</h5>
+                    <p class="card-text">@Model.Description</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Publication Date:</strong> @Model.PublicationDate.ToShortDateString()
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Genre:</strong> @Model.Genre
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Authors:</strong>
+                        <ul>
+                            @foreach (var bookAuthor in Model.BookAuthors)
+                            {
+                                <li>@bookAuthor.Author.AuthorName</li>
+                            }
+                        </ul>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Availability:</strong> @Model.AvailabilityStatus
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

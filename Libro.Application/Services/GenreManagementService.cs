@@ -19,7 +19,13 @@ namespace Libro.Application.Services
             _genreRepository = genreRepository;
             _mapper = mapper;
         }
+        public async Task<IEnumerable<GenreDTO>> GetAllGenresAsync()
+        {
+            var genres = await _genreRepository.GetAllGenresAsync();
+            var genresDTO = _mapper.Map<IEnumerable<GenreDTO>>(genres);
 
+            return genresDTO;
+        }
         public async Task<IEnumerable<BookDTO>> GetBooksByGenreAsync(int genreId)
         {
             var books = await _genreRepository.GetBooksByGenreAsync(genreId);
