@@ -14,5 +14,6 @@ namespace Libro.Application.ServicesInterfaces
         Task<BookDTO> CreateBookAsync(BookDTO bookDTO);
         Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO);
         Task<bool> DeleteBookAsync(int bookId);
+        Task<List<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus);
     }
 }
