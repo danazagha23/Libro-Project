@@ -8,8 +8,8 @@ namespace Libro.Domain.Enums
 {
     public enum TransactionType
     {
-        Borrowing,
-        Reserving,
-        Returning
+        Borrowed,
+        Reserved,
+        Returned
     }
 }

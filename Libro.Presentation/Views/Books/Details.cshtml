@@ -12,7 +12,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">@Model.Title</h5>
-                    <p class="card-text">@Model.Description</p>
+                    <p class="card-text">@Model.Description+@Model.BookId</p>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
@@ -35,6 +35,33 @@
                     </li>
                 </ul>
             </div>
+            @if (User.IsInRole("Patron"))
+            {
+                @if (Model.AvailabilityStatus.ToString() == "Available")
+                {
+                    <form asp-controller="BookTransactions" asp-action="Reserve" method="post">
+                        <input type="hidden" name="bookId" value="@Model.BookId" />
+                        <button type="submit" class="btn btn-primary">Reserve</button>
+                    </form>
+                }
+                else if (Model.AvailabilityStatus.ToString() == "Reserved")
+                {
+                    <p>This book is already reserved.</p>
+                }
+                else
+                {
+                    <p>This book is not available for reservation.</p>
+                }
+            }
         </div>
     </div>
 </div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        window.onload = function() {
+            alert('@TempData["SuccessMessage"]');
+        }
+    </script>
+}

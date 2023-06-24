@@ -2,6 +2,7 @@ using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
 using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Libro.Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -26,10 +27,12 @@ builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IAuthorManagementService, AuthorManagementService>();
 builder.Services.AddScoped<IGenreManagementService, GenreManagementService>();
 builder.Services.AddScoped<IBookManagementService, BookManagementService>();
+builder.Services.AddScoped<IBookTransactionsService, BookTransactionsService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
 
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookTransactionsRepository, BookTransactionsRepository>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
