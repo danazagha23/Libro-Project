@@ -21,5 +21,9 @@ namespace Libro.Application.ServicesInterfaces
         Task<bool> DeleteUserAsync(int userId);
         Task<UserDTO> AuthenticateUserAsync(string username, string password);
         Task<bool> AssignRoleAsync(string username, UserRole userRole);
+
+        Task<List<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId);
+        Task<List<BookTransactionDTO>> GetCurrentLoansAsync(int patronId);
+        Task<List<BookTransactionDTO>> GetOverdueLoansAsync(int patronId);
     }
 }
