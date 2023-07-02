@@ -10,6 +10,7 @@ namespace Libro.Domain.Enums
     {
         Available,
         Reserved,
-        Borrowed
+        Borrowed,
+        UnAvailable
     }
 }

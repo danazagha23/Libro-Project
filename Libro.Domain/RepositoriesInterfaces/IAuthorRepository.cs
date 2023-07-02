@@ -11,6 +11,7 @@ namespace Libro.Domain.Interfaces
     {
         Task<IEnumerable<Author>> GetAllAuthorsAsync();
         Task<Author> GetAuthorByIdAsync(int authorId);
+        Task<Author> GetAuthorByNameAsync(string authorName);
 
         Task<bool> CreateAuthorAsync(Author author);
         Task<Author> UpdateAuthorAsync(int authorId, Author authorDTO);

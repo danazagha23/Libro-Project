@@ -12,8 +12,10 @@ namespace Libro.Application.ServicesInterfaces
         Task<IEnumerable<BookDTO>> GetAllBooksAsync();
         Task<BookDTO> GetBookByIdAsync(int bookId);
         Task<BookDTO> CreateBookAsync(BookDTO bookDTO);
+        Task<BookAuthorDTO> CreateBookAuthorAsync(int bookId, int authorId);
         Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO);
         Task<bool> DeleteBookAsync(int bookId);
+        Task<bool> DeleteBookAuthorsByBookIdAsync(int bookId);
         Task<List<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus);
     }
 }

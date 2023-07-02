@@ -19,7 +19,9 @@ namespace Libro.Infrastructure.Data.Repositories
         }
         public async Task<IEnumerable<Genre>> GetAllGenresAsync()
         {
-            return await _context.Genres.ToListAsync();
+            return await _context.Genres
+                .Include(genre => genre.Books)
+                .ToListAsync();
         }
         public async Task<IEnumerable<Book>> GetBooksByGenreAsync(int genreId)
         {
