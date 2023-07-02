@@ -11,6 +11,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Libro.Application.Services
 {
@@ -61,7 +62,7 @@ namespace Libro.Application.Services
         public async Task<UserDTO> CreateUserAsync(UserDTO userDTO)
         {
             // Validation
-            await _validationService.ValidateUsernameAsync(userDTO.Username);
+            await _validationService.ValidateUsernameAsync(userDTO.Username, userDTO.UserId);
             _validationService.ValidatePassword(userDTO.Password);
             _validationService.ValidateEmail(userDTO.Email);
 
@@ -78,6 +79,10 @@ namespace Libro.Application.Services
 
         public async Task<UserDTO> UpdateUserAsync(int userId, UserDTO userDTO)
         {
+            // Validation
+            _validationService.ValidatePassword(userDTO.Password);
+            _validationService.ValidateEmail(userDTO.Email);
+
             var user = _mapper.Map<User>(userDTO);
             await _userRepository.UpdateUserAsync(userId, user);
 
@@ -143,6 +148,27 @@ namespace Libro.Application.Services
             await _userRepository.UpdateUserAsync(user.UserId, user);
 
             return true;
+        }
+
+        public async Task<List<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId)
+        {
+            var borrowingHistory = await _userRepository.GetBorrowingHistoryAsync(patronId);
+
+            return _mapper.Map<List<BookTransactionDTO>>(borrowingHistory);
+        }
+
+        public async Task<List<BookTransactionDTO>> GetCurrentLoansAsync(int patronId)
+        {
+            var currentLoans = await _userRepository.GetCurrentLoansAsync(patronId);
+
+            return _mapper.Map<List<BookTransactionDTO>>(currentLoans);
+        }
+
+        public async Task<List<BookTransactionDTO>> GetOverdueLoansAsync(int patronId)
+        {
+            var overdueLoans = await _userRepository.GetOverdueLoansAsync(patronId);
+
+            return _mapper.Map<List<BookTransactionDTO>>(overdueLoans);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Libro.Application.ServicesInterfaces
 {
     public interface IValidationService
     {
-        Task ValidateUsernameAsync(string username);
+        Task ValidateUsernameAsync(string username, int userId);
         void ValidatePassword(string password);
         void ValidateEmail(string email);
     }
