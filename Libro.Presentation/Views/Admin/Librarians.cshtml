@@ -1,16 +1,16 @@
 ﻿@model UsersViewModel
 
-<h1>All Patrons</h1>
-<form asp-controller="Admin" asp-action="Patrons" method="get">
+<h1>All Librarians</h1>
+<form asp-controller="Admin" asp-action="Librarians" method="get">
     <div class="row mb-3">
         <div class="col-md-3">
             <div class="form-group">
-                <label for="selectedPatron">Patron Username:</label>
-                <input type="text" list="patronNames" id="selectedPatron" name="selectedPatron" class="form-control" value="@Model.SelectedUser" placeholder="Enter patron username" />
-                <datalist id="patronNames">
-                    @foreach (var patron in Model.Users.Take(50))
+                <label for="selectedLibrarian">Librarian Username:</label>
+                <input type="text" list="librarianNames" id="selectedLibrarian" name="selectedLibrarian" class="form-control" value="@Model.SelectedUser" placeholder="Enter librarian username" />
+                <datalist id="librarianNames">
+                    @foreach (var lib in Model.Users.Take(50))
                     {
-                        <option value="@patron.Username">@patron.Username</option>
+                        <option value="@lib.Username">@lib.Username</option>
                     }
                 </datalist>
             </div>
@@ -57,7 +57,7 @@
     }
     else
     {
-        <p>No users found.</p>
+        <p>No librarians found.</p>
     }
 
     <nav>
@@ -65,20 +65,19 @@
             @if (Model.PageNumber > 1)
             {
                 <li class="page-item">
-                    <a class="page-link" href="@Url.Action("Patrons", new { page = Model.PageNumber - 1, SelectedPatron = Model.SelectedUser})">Previous</a>
+                    <a class="page-link" href="@Url.Action("Librarians", new { page = Model.PageNumber - 1, SelectedLibrarian = Model.SelectedUser})">Previous</a>
                 </li>
             }
             @for (int i = 1; i <= Model.TotalPages; i++)
             {
                 <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Patrons", new { page = i , SelectedPatron = Model.SelectedUser})">@i</a>
-
+                    <a class="page-link" href="@Url.Action("Librarians", new { page = i , SelectedLibrarian = Model.SelectedUser})">@i</a>
                 </li>
             }
             @if (Model.PageNumber < Model.TotalPages)
             {
                 <li class="page-item">
-                    <a class="page-link" href="@Url.Action("Patrons", new { page = Model.PageNumber + 1 , SelectedPatron = Model.SelectedUser})">Next</a>
+                    <a class="page-link" href="@Url.Action("Librarians", new { page = Model.PageNumber + 1 , SelectedLibrarian = Model.SelectedUser})">Next</a>
                 </li>
             }
         </ul>
@@ -87,6 +86,6 @@
 
 <script>
     function clearFilters() {
-        document.getElementById("selectedPatron").value = "";
+        document.getElementById("selectedLibrarian").value = "";
     }
 </script>

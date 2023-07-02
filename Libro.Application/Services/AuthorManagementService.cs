@@ -33,6 +33,13 @@ namespace Libro.Application.Services
             var authorDTO = _mapper.Map<AuthorDTO>(author);
 
             return authorDTO;
+        }       
+        public async Task<AuthorDTO> GetAuthorByNameAsync(string authorName)
+        {
+            var author = await _authorRepository.GetAuthorByNameAsync(authorName);
+            var authorDTO = _mapper.Map<AuthorDTO>(author);
+
+            return authorDTO;
         }
         public async Task<AuthorDTO> CreateAuthorAsync(AuthorDTO authorDTO)
         {

@@ -56,6 +56,19 @@ namespace Libro.Infrastructure.Data.Repositories
             return true;    
         }
 
+        public async Task<BookAuthor> CreateBookAuthorAsync(int bookId, int authorId)
+        {
+            var bookAuthor = new BookAuthor
+            {
+                AuthorId = authorId,
+                BookId = bookId
+            };
+            _context.BookAuthors.Add(bookAuthor);
+            await _context.SaveChangesAsync();
+
+            return bookAuthor;
+        }
+
         public async Task<Book> UpdateBookAsync(int bookId, Book book)
         {
             var existingBook = await _context.Books.FindAsync(bookId);
@@ -81,6 +94,24 @@ namespace Libro.Infrastructure.Data.Repositories
             else
             {
                 _context.Books.Remove(book);
+                await _context.SaveChangesAsync();
+            }
+            return true;
+        }
+        public async Task<bool> DeleteBookAuthorsByBookIdAsync(int bookId)
+        {
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null)
+            {
+                throw new Exception("Book not Found");
+            }
+            else
+            {
+                var bookAuthors = await _context.BookAuthors
+                   .Where(ba => ba.BookId == bookId)
+                   .ToListAsync();
+
+                _context.BookAuthors.RemoveRange(bookAuthors);
                 await _context.SaveChangesAsync();
             }
             return true;
