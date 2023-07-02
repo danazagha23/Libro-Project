@@ -17,7 +17,7 @@ namespace Libro.Application.DTOs
         public int GenreId { get; set; }
         public AvailabilityStatus AvailabilityStatus { get; set; }
 
-        public IEnumerable<BookAuthorDTO> BookAuthors { get; set; }
+        public ICollection<BookAuthorDTO> BookAuthors { get; set; }
         public GenreDTO Genre { get; set; }
     }
 }

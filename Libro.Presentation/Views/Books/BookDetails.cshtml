@@ -1,7 +1,7 @@
 ﻿@model BookDetailsViewModel
 
 @{
-    ViewData["Title"] = "Book Details";
+    ViewData["Title"] = "BookDetails";
 }
 
 <div class="container">
@@ -19,7 +19,7 @@
                         <strong>Publication Date:</strong> @Model.PublicationDate.ToShortDateString()
                     </li>
                     <li class="list-group-item">
-                        <strong>Genre:</strong> @Model.Genre
+                        <strong>Genre:</strong> @Model.Genre.Name
                     </li>
                     <li class="list-group-item">
                         <strong>Authors:</strong>
@@ -52,6 +52,20 @@
                 {
                     <p>This book is not available for reservation.</p>
                 }
+            }
+            @if (User.IsInRole("Librarian"))
+            {
+            <div class="d-flex justify-content-space-between">
+                <form asp-controller="Books" asp-action="EditBook" method="get">
+                    <input type="hidden" name="bookId" value="@Model.BookId" />
+                    <button type="submit" class="btn btn-primary">Edit</button>
+                </form>
+                <div>    </div>
+                <form asp-controller="Books" asp-action="DeleteBook" method="post" class="ml-2">
+                    <input type="hidden" name="bookId" value="@Model.BookId" />
+                    <button type="submit" class="btn btn-primary">Delete</button>
+                </form>
+            </div>
             }
         </div>
     </div>

@@ -58,6 +58,7 @@
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Filter</button>
                     <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+                    <a href="@Url.Action("CreateBook", "Books")" class="btn btn-primary">Add New Book</a>
                 </div>
             </div>
         </div>
@@ -87,13 +88,13 @@
                             @Html.DisplayFor(modelItem => bookAuthor.Author.AuthorName)
                             @if (!bookAuthor.Equals(item.BookAuthors.Last()))
                             {
-                                @:", "
+                                @:,
                             }
                         }
                     </td>
                     <td>@Html.DisplayFor(modelItem => item.AvailabilityStatus)</td>
                     <td>
-                        <a href="@Url.Action("Details", "Books", new { id = item.BookId })" class="btn btn-primary">Details</a>
+                        <a href="@Url.Action("BookDetails", "Books", new { id = item.BookId })" class="btn btn-primary">Details</a>
                     </td>
                 </tr>
             }
