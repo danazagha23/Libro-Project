@@ -13,6 +13,7 @@ namespace Libro.Presentation.Controllers
         private readonly IBookTransactionsService _bookTransactionsService;
         private readonly IBookManagementService _bookManagementService;
         private readonly IUserManagementService _userManagementService;
+
         public BookTransactionsController(IBookTransactionsService bookTransactionsService,IBookManagementService bookManagementService ,IUserManagementService userManagementService)
         {
             _bookTransactionsService = bookTransactionsService;
@@ -36,8 +37,8 @@ namespace Libro.Presentation.Controllers
             try
             {
                 await _bookTransactionsService.ReserveBookAsync(bookId, patronId);
-                var successMessage = "Book reserved successfully";
-                TempData["SuccessMessage"] = successMessage;
+                //var successMessage = "Book reserved successfully";
+                //TempData["SuccessMessage"] = successMessage;
                 return RedirectToAction("Details", "Books", new { id = bookId});
             }
             catch (Exception ex)

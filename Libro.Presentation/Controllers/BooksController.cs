@@ -96,7 +96,7 @@ namespace Libro.Presentation.Controllers
                 AllGenres = Genres.ToList(),
                 SelectedGenre = book.Genre.Name,
                 AllAuthors = authors.ToList(),
-                SelectedAuthors = book.BookAuthors.Select(a => a.Author.AuthorName).ToList()
+                SelectedAuthors = book.BookAuthors?.Select(a => a.Author.AuthorName)?.ToList() ?? new List<string>()
             };
 
             return View(bookViewModel);

@@ -61,6 +61,11 @@ namespace Libro.Application.Services
 
         public async Task<UserDTO> CreateUserAsync(UserDTO userDTO)
         {
+            if (userDTO == null)
+            {
+                throw new ArgumentNullException(nameof(userDTO));
+            }
+
             // Validation
             await _validationService.ValidateUsernameAsync(userDTO.Username, userDTO.UserId);
             _validationService.ValidatePassword(userDTO.Password);
