@@ -624,6 +624,39 @@ namespace Libro.Infrastructure.Migrations
                     b.ToTable("ReadingLists");
                 });
 
+            modelBuilder.Entity("Libro.Domain.Entities.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReviewDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("Libro.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -741,6 +774,25 @@ namespace Libro.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Libro.Domain.Entities.Review", b =>
+                {
+                    b.HasOne("Libro.Domain.Entities.Book", "Book")
+                        .WithMany("Reviews")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Libro.Domain.Entities.User", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Libro.Domain.Entities.Author", b =>
                 {
                     b.Navigation("BookAuthors");
@@ -749,6 +801,8 @@ namespace Libro.Infrastructure.Migrations
             modelBuilder.Entity("Libro.Domain.Entities.Book", b =>
                 {
                     b.Navigation("BookAuthors");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Libro.Domain.Entities.Genre", b =>
@@ -759,6 +813,8 @@ namespace Libro.Infrastructure.Migrations
             modelBuilder.Entity("Libro.Domain.Entities.User", b =>
                 {
                     b.Navigation("ReadingLists");
+
+                    b.Navigation("Reviews");
 
                     b.Navigation("Transactions");
                 });
