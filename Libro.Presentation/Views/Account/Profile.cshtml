@@ -36,6 +36,9 @@
                 <li class="nav-item">
                     <a class="nav-link" id="overdue-loans-tab" data-toggle="tab" href="#overdue-loans" role="tab" aria-controls="overdue-loans" aria-selected="false">Overdue Loans</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="reading-lists-tab" data-toggle="tab" href="#reading-lists" role="tab" aria-controls="reading-lists" aria-selected="false">Reading Lists</a>
+                </li>
             </ul>
             <div class="tab-content mt-3" id="myTabContent">
                 <div class="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history-tab">
@@ -120,6 +123,65 @@
                         <p>No overdue loans found.</p>
                     }
                 </div>
+                <!-- Reading Lists -->
+                <!-- Reading Lists -->
+                <div class="tab-pane fade" id="reading-lists" role="tabpanel" aria-labelledby="reading-lists-tab">
+                    @if (Model.ReadingLists.Count > 0)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Reading List Name</th>
+                                    <!-- Additional columns if needed -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var readingList in Model.ReadingLists)
+                                {
+                                    <tr>
+                                        <td>My Reading List</td>
+                                        @if (readingList.Books.ToList().Count > 0)
+                                        {
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Books</th>
+                                                        <th>Action</th> <!-- Add the Action column for removing books -->
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var book in readingList.Books)
+                                                    {
+                                                        <tr>
+                                                            <td>@book.Title</td>
+                                                            <td>
+                                                                <form asp-controller="Books" asp-action="RemoveFromReadingList" method="post">
+                                                                    <input type="hidden" name="id" value="@book.BookId" />
+                                                                    <button type="submit" class="btn btn-danger" title="Remove Book">
+                                                                        Remove
+                                                                    </button>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                        else
+                                        {
+                                            <p>No books found in this reading list.</p>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No reading lists found.</p>
+                    }
+                </div>
+
             </div>
         </div>
     </div>

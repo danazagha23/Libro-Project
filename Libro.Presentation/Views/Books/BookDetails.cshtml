@@ -2,11 +2,35 @@
 
 @{
     ViewData["Title"] = "BookDetails";
+         
+    var isBookInReadingList = Model.IsBookInReadingList; // Check if the book is already in the reading list
+    var toggleButtonText = isBookInReadingList ? "Remove from Reading List" : "Add to Reading List";
+    var toggleButtonClass = isBookInReadingList ? "btn-danger" : "btn-primary";
 }
 
 <div class="container">
     <h1>Book Details</h1>
-
+    @if (User.IsInRole("Patron"))
+    {
+        @if (isBookInReadingList)
+        {
+            <form asp-controller="Books" asp-action="RemoveFromReadingList" method="post">
+                <input type="hidden" name="id" value="@Model.BookId" />
+                <button type="submit" class="btn @toggleButtonClass" title="@toggleButtonText">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+            </form>
+        }
+        else
+        {
+            <form asp-controller="Books" asp-action="AddToReadingList" method="post">
+                <input type="hidden" name="id" value="@Model.BookId" />
+                <button type="submit" class="btn @toggleButtonClass" title="@toggleButtonText">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+            </form>
+        }
+    }
     <div class="row">
         <div class="col-md-6">
             <div class="card">

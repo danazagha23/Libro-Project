@@ -14,12 +14,14 @@ namespace Libro.Infrastructure.Data.DbContexts
         {
 
         }
+
         public DbSet<Book> Books { get; set; }
         public DbSet<Author> Authors { get; set; }
         public DbSet<BookAuthor> BookAuthors { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookTransaction> BookTransactions { get; set; }
+        public DbSet<ReadingList> ReadingLists { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

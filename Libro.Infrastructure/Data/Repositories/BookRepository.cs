@@ -27,6 +27,7 @@ namespace Libro.Infrastructure.Data.Repositories
                 .Include(book => book.BookAuthors)
                     .ThenInclude(bookAuthor => bookAuthor.Author)
                 .Include(book => book.Genre)
+                .Include(rl => rl.ReadingLists)
                 .ToListAsync();
 
             return books;
@@ -38,6 +39,7 @@ namespace Libro.Infrastructure.Data.Repositories
                 .Include(b => b.BookAuthors)
                     .ThenInclude(ba => ba.Author)
                 .Include(b => b.Genre)
+                .Include(rl => rl.ReadingLists)
                 .FirstOrDefaultAsync(b => b.BookId == bookId);
 
             if (book == null)

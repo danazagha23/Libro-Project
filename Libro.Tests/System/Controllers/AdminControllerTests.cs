@@ -158,39 +158,39 @@ namespace Libro.Tests.Controllers
 
         [Fact]
         public void CreateUser_ReturnsView()
+        {
+            // Act
+            var result = _controller.CreateUser() as ViewResult;
+
+            // Assert
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task CreateUser_ValidModel_RedirectToAction()
+        {
+            // Arrange
+            var registerViewModel = new RegisterViewModel
             {
-                // Act
-                var result = _controller.CreateUser() as ViewResult;
+                Username = "testuser",
+                Password = "testpassword",
+                ConfirmPassword = "testpassword",
+                Email = "testuser@example.com",
+                FirstName = "test",
+                LastName = "user",
+                PhoneNumber = "0595409501",
+                Address = "Nablus"
+            };
 
-                // Assert
-                Assert.NotNull(result);
-            }
+            _mapperMock.Setup(x => x.Map<UserDTO>(It.IsAny<RegisterViewModel>())).Returns(new UserDTO());
+            _userManagementServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<UserDTO>())).ReturnsAsync(new UserDTO());
 
-            [Fact]
-            public async Task CreateUser_ValidModel_RedirectToAction()
-            {
-                // Arrange
-                var registerViewModel = new RegisterViewModel
-                {
-                    Username = "testuser",
-                    Password = "testpassword",
-                    ConfirmPassword = "testpassword",
-                    Email = "testuser@example.com",
-                    FirstName = "test",
-                    LastName = "user",
-                    PhoneNumber = "0595409501",
-                    Address = "Nablus"
-                };
+            // Act
+            var result = await _controller.CreateUser(registerViewModel) as RedirectToActionResult;
 
-                _mapperMock.Setup(x => x.Map<UserDTO>(It.IsAny<RegisterViewModel>())).Returns(new UserDTO());
-                _userManagementServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<UserDTO>())).ReturnsAsync(new UserDTO());
-
-                // Act
-                var result = await _controller.CreateUser(registerViewModel) as RedirectToActionResult;
-
-                // Assert
-                Assert.NotNull(result);
-                Assert.Equal("Librarians", result.ActionName);
-            }
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("Librarians", result.ActionName);
+        }
         }
     }

@@ -29,7 +29,7 @@ namespace Libro.Tests.Controllers
             _genreServiceMock = new Mock<IGenreManagementService>();
             _authorServiceMock = new Mock<IAuthorManagementService>();
             _mapperMock = new Mock<IMapper>();
-            _controller = new BooksController(_bookServiceMock.Object, _genreServiceMock.Object, _authorServiceMock.Object, _mapperMock.Object);
+            //_controller = new BooksController(_bookServiceMock.Object, _genreServiceMock.Object, _authorServiceMock.Object, _mapperMock.Object);
         }
 
         [Fact]

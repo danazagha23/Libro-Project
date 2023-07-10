@@ -14,5 +14,7 @@ namespace Libro.Presentation.Models
 
         public IEnumerable<BookAuthorDTO> BookAuthors { get; set; }
         public GenreDTO Genre { get; set; }
+
+        public bool IsBookInReadingList { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Auth0.ManagementApi.Paging;
+﻿using Auth0.ManagementApi.Models;
+using Auth0.ManagementApi.Paging;
 using AutoMapper;
 using Libro.Application.DTOs;
 using Libro.Application.Services;
@@ -10,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Net;
+using System.Security.Claims;
 
 namespace Libro.Presentation.Controllers
 {
@@ -18,13 +21,17 @@ namespace Libro.Presentation.Controllers
         private readonly IBookManagementService _bookManagementService;
         private readonly IGenreManagementService _genreManagementService;
         private readonly IAuthorManagementService _authorManagementService;
+        private readonly IUserManagementService _userManagementService;
+        private readonly IReadingListService _readingListService;
         private readonly IMapper _mapper;
 
-        public BooksController(IBookManagementService bookManagementService, IGenreManagementService genreManagementService,IAuthorManagementService authorManagementService, IMapper mapper)
+        public BooksController(IBookManagementService bookManagementService, IGenreManagementService genreManagementService,IAuthorManagementService authorManagementService,IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper)
         {
             _bookManagementService = bookManagementService;
             _genreManagementService = genreManagementService;
             _authorManagementService = authorManagementService;
+            _userManagementService = userManagementService;
+            _readingListService = readingListService;
             _mapper = mapper;
         }
 
@@ -61,16 +68,32 @@ namespace Libro.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> BookDetails(int id)
         {
+            // Get the currently logged-in user
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            // Check if the book is in the user's reading list
+            var readingLists = await _readingListService.GetReadingListsByUserIdAsync(userId);
+            var readingList = readingLists.FirstOrDefault();
+
+            var isBookInReadingList = false;
+            if (readingList != null)
+            {
+                isBookInReadingList = await _readingListService.IsBookInReadingListAsync(readingList.Id, id);
+            }
+
             var book = await _bookManagementService.GetBookByIdAsync(id);
 
             if (book == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
 
             var detailsViewModel = _mapper.Map<BookDetailsViewModel>(book);
             detailsViewModel.Genre = book.Genre;
+            detailsViewModel.IsBookInReadingList = isBookInReadingList;
+
             return View(detailsViewModel);
+
         }
 
         [Authorize(Roles = "Librarian")]
@@ -206,6 +229,59 @@ namespace Libro.Presentation.Controllers
                 await _bookManagementService.CreateBookAuthorAsync(createdBook.BookId, author.AuthorId);
             }
             return Redirect("Search");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Patron")]
+        public async Task<IActionResult> AddToReadingList(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var readingLists = await _readingListService.GetReadingListsByUserIdAsync(userId);
+            var readingList = readingLists.FirstOrDefault();
+
+            if (readingList == null)
+            {
+                var newReadingList = await _readingListService.CreateReadingListAsync(userId);
+                readingLists.ToList().Add(newReadingList);
+                readingList = newReadingList;
+            }
+
+            var isBookInReadingList = await _readingListService.IsBookInReadingListAsync(readingList.Id, id);
+
+            if (!isBookInReadingList)
+            {
+                await _readingListService.AddBookToReadingListAsync(readingList.Id, id);
+                TempData["SuccessMessage"] = "Book added to reading list.";
+            }
+
+            return RedirectToAction("BookDetails", "Books", new { id = id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Patron")]
+        public async Task<IActionResult> RemoveFromReadingList(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var readingLists = await _readingListService.GetReadingListsByUserIdAsync(userId);
+            var readingList = readingLists.FirstOrDefault();
+
+            await _readingListService.RemoveBookFromReadingListAsync(readingList.Id, id);
+            TempData["SuccessMessage"] = "Book removed from reading list.";
+
+            var returnUrl = "";
+
+            if (Request.Headers["Referer"].ToString()?.Contains("/Books/BookDetails") == true)
+            {
+                returnUrl = Url.Action("BookDetails", "Books", new { id = id });
+            }
+            else
+            {
+                returnUrl = Url.Action("Profile", "Account");
+            }
+
+            return Redirect(returnUrl);
         }
 
     }

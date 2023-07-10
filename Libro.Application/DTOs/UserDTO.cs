@@ -1,4 +1,5 @@
-﻿using Libro.Domain.Enums;
+﻿using Libro.Domain.Entities;
+using Libro.Domain.Enums;
 
 namespace Libro.Application.DTOs
 {
@@ -14,6 +15,7 @@ namespace Libro.Application.DTOs
         public string Address { get; set; }
         public UserRole Role { get; set; }
 
+        public IEnumerable<ReadingListDTO> ReadingLists { get; set; }
         public IEnumerable<BookTransactionDTO> BookTransactions { get; set; }
     }
 }

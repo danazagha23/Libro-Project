@@ -16,11 +16,13 @@ namespace Libro.Presentation.Controllers
     public class AccountController : Controller
     {
         private readonly IUserManagementService _userManagementService;
+        private readonly IReadingListService _readingListRepository;
         private readonly IMapper _mapper;
 
-        public AccountController(IUserManagementService userManagementService, IMapper mapper)
+        public AccountController(IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper)
         {
             _userManagementService = userManagementService;
+            _readingListRepository = readingListService;
             _mapper = mapper;
         }
 
@@ -113,13 +115,15 @@ namespace Libro.Presentation.Controllers
             var borrowingHistory = await _userManagementService.GetBorrowingHistoryAsync(userId);
             var currentLoans = await _userManagementService.GetCurrentLoansAsync(userId);
             var overdueLoans = await _userManagementService.GetOverdueLoansAsync(userId);
+            var readingLists = await _readingListRepository.GetReadingListsByUserIdAsync(userId); // Retrieve the reading lists
 
             var userProfile = new UserProfileViewModel
             {
                 User = userDTO,
                 BorrowingHistory = borrowingHistory,
                 CurrentLoans = currentLoans,
-                OverdueLoans = overdueLoans
+                OverdueLoans = overdueLoans,
+                ReadingLists = readingLists.ToList() 
             };
 
             return View(userProfile);
