@@ -23,6 +23,7 @@ namespace Libro.Infrastructure.Data.DbContexts
         public DbSet<BookTransaction> BookTransactions { get; set; }
         public DbSet<ReadingList> ReadingLists { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -66,6 +66,9 @@
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Authors" asp-action="CreateAuthor">Add New Author</a></li>
                                     </ul>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Librarian" asp-action="Notification">Send Notification</a>
+                                </li>
                             }
                             @if (User.IsInRole("Administrator") || User.IsInRole("Librarian"))
                             {

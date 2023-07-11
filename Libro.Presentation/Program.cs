@@ -36,6 +36,7 @@ builder.Services.AddScoped<IBookTransactionsService, BookTransactionsService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
 builder.Services.AddScoped<IReadingListService, ReadingListService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
@@ -44,6 +45,7 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReadingListRepository, ReadingListRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddAutoMapper(typeof(Libro.Application.Mappings.MappingProfiles));
 builder.Services.AddAutoMapper(typeof(Libro.Presentation.Mappings.MappingProfiles));
