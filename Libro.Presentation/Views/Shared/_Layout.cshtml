@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isHomePage = ViewContext.RouteData.Values["Controller"].ToString().Equals("Home", StringComparison.OrdinalIgnoreCase)
+        && ViewContext.RouteData.Values["Action"].ToString().Equals("Index", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -90,6 +94,29 @@
                         }
                         else
                         {
+                            @if (User.IsInRole("Patron") && isHomePage)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-bell"></i>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <h6 class="dropdown-header">Notifications</h6>
+                                        @foreach (var notification in Model.Notifications)
+                                        {
+                                            if (notification.Message.Contains("available"))
+                                            {
+                                                <li><a class="dropdown-item" href="@Url.Action("Search", "Books")">@notification.Message</a></li>
+                                            }
+                                            else
+                                            {
+                                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Account")">@notification.Message</a></li>
+                                            }
+                                            <li class="dropdown-divider"></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fas fa-user"></i>

@@ -35,7 +35,7 @@ namespace Libro.Tests.Controllers
             _bookServiceMock.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(availableBooks);
 
             // Act
-            var result = await _controller.Index();
+            var result = await _controller.IndexAsync();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
