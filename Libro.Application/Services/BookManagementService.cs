@@ -50,7 +50,7 @@ namespace Libro.Application.Services
 
             return _mapper.Map<BookAuthorDTO>(bookAuthor);
         }
-            public async Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO)
+        public async Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO)
         {
             var book = _mapper.Map<Book>(bookDTO);
             await _bookRepository.UpdateBookAsync(bookId, book);

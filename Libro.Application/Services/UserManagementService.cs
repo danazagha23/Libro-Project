@@ -21,15 +21,17 @@ namespace Libro.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IReadingListRepository _readingListRepository;
+        private readonly IGenreRepository _genreRepository;
         private readonly IValidationService _validationService;
         private readonly IMapper _mapper;
-        public UserManagementService(IUserRepository userRepository, IBookRepository bookRepository, IReadingListRepository readingListRepository, IValidationService validationService, IMapper mapper)
+        public UserManagementService(IUserRepository userRepository, IBookRepository bookRepository, IReadingListRepository readingListRepository, IValidationService validationService, IMapper mapper, IGenreRepository genreRepository)
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
             _readingListRepository = readingListRepository;
             _validationService = validationService;
             _mapper = mapper;
+            _genreRepository = genreRepository;
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
@@ -179,6 +181,48 @@ namespace Libro.Application.Services
             var overdueLoans = await _userRepository.GetOverdueLoansAsync(patronId);
 
             return _mapper.Map<List<BookTransactionDTO>>(overdueLoans);
+        }
+
+        public async Task<List<string>> FindMostFrequentGenresForUserAsync(int userId)
+        {
+            var allGenres = await _genreRepository.GetAllGenresAsync();
+            var genres = new List<string>();
+            var genreCounter = new Dictionary<string, int>();
+            var bookTransactions = await _userRepository.GetBorrowingHistoryAsync(userId);
+            if (bookTransactions != null && bookTransactions.Any())
+            {
+                foreach (var transaction in bookTransactions)
+                {
+                    var book = transaction.Book;
+                    if (!genreCounter.ContainsKey(book.Genre.Name))
+                    {
+                        genreCounter[book.Genre.Name] = 1;
+                    }
+                    else
+                    {
+                        genreCounter[book.Genre.Name]++;
+                    }
+                }
+                int maxCount = 0;
+                if (genreCounter.Values.Any())
+                {
+                    maxCount = genreCounter.Values.Max();
+                }
+                genres = genreCounter.Where(kv => kv.Value == maxCount).Select(kv => kv.Key).ToList();
+            }
+            return genres;
+        }
+
+        public async Task<IEnumerable<BookDTO>> GetUserRecommendationsAsync(int userId)
+        {
+            
+            var genres = await FindMostFrequentGenresForUserAsync(userId);
+            var books = await _bookRepository.GetAllBooksAsync();
+            var bookDTOs = _mapper.Map<IEnumerable<BookDTO>>(books);
+
+            var recommendationBooks = bookDTOs.Where(book => genres.Contains(book.Genre.Name));
+
+            return recommendationBooks.ToList();
         }
     }
 }

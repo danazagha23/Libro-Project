@@ -138,26 +138,5 @@ namespace Libro.Presentation.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme);
             return Redirect("/");
         }
-
-        [Authorize(Roles = "Patron")]
-        [HttpGet]
-        public async Task<IActionResult> Notifications()
-        {
-            int unreadNotificationCount = 0;
-            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            unreadNotificationCount = await _notificationService.GetUnreadNotificationCountAsync(userId);
-        
-            var notifications = await _notificationService.GetNotificationsForUserAsync(userId);
-            var model = new NotificationsViewModel
-            {
-                Notifications = notifications,
-                UnreadNotificationCount = unreadNotificationCount
-            };
-
-            return View(model);
-        }
-
-
     }
 }

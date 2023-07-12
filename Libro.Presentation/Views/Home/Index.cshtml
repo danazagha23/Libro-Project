@@ -72,6 +72,23 @@
                 </div>
             </div>
         </div>
+        <div class="container">
+            <h2 class="text-md-start mb-4">Book Recommendations</h2>
+            <div class="row">
+                @foreach (var book in Model.BookRecommendations)
+                {
+                    <div class="col-sm-4 mb-4">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <h5 class="card-title">@book.Title</h5>
+                                <p class="card-text">@book.Description</p>
+                                <a href="@Url.Action("BookDetails", "Books", new { id = book.BookId })" class="btn btn-outline-dark">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
     }
 </div>
 
