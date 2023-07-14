@@ -1,3 +1,5 @@
+using AutoMapper;
+using EFCore.NamingConventions.Internal;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
@@ -5,14 +7,16 @@ using Libro.Domain.Interfaces;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Libro.Infrastructure.Data.Repositories;
+using Libro.Presentation.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System.Text;
+using Scrutor;
+using Serilog;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,33 +32,32 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-builder.Services.AddScoped<IUserManagementService, UserManagementService>();
-builder.Services.AddScoped<IAuthorManagementService, AuthorManagementService>();
-builder.Services.AddScoped<IGenreManagementService, GenreManagementService>();
-builder.Services.AddScoped<IBookManagementService, BookManagementService>();
-builder.Services.AddScoped<IBookTransactionsService, BookTransactionsService>();
-builder.Services.AddScoped<IValidationService, ValidationService>();
-builder.Services.AddScoped<IReadingListService, ReadingListService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
+var assemblies = new[]
+{
+    Assembly.GetAssembly(typeof(UserManagementService)), // Assembly for UserManagementService
+    Assembly.GetAssembly(typeof(UserRepository)),
+    Assembly.GetAssembly(typeof(HomeController))
+};
 
-builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IBookTransactionsRepository, BookTransactionsRepository>();
-builder.Services.AddScoped<IGenreRepository, GenreRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IReadingListRepository, ReadingListRepository>();
-builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+// Use Scrutor for convention-based registration
+builder.Services.Scan(scan =>
+{
+    scan.FromAssemblies(assemblies)
+        .AddClasses(classes => classes.Where(type =>
+            type.Name.EndsWith("Service") || type.Name.EndsWith("Repository")))
+        .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+        .AsImplementedInterfaces()
+        .WithScopedLifetime();
+});
 
-builder.Services.AddAutoMapper(typeof(Libro.Application.Mappings.MappingProfiles));
-builder.Services.AddAutoMapper(typeof(Libro.Presentation.Mappings.MappingProfiles));
+builder.Services.AddAutoMapper(assemblies);
 
 // Build the IConfiguration instance
 var configuration = new ConfigurationBuilder()
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .Build();
+
 
 // Add the IConfiguration instance to the services collection
 builder.Services.AddSingleton<IConfiguration>(configuration);
@@ -64,6 +67,18 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.MinimumSameSitePolicy = SameSiteMode.None;
     options.HttpOnly = HttpOnlyPolicy.Always;
     options.Secure = CookieSecurePolicy.Always; // Set secure policy
+});
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.AddSerilog(Log.Logger);
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
