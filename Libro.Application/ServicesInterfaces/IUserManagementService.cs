@@ -11,8 +11,8 @@ namespace Libro.Application.ServicesInterfaces
 {
     public interface IUserManagementService
     {
-        Task<IEnumerable<UserDTO>> GetAllUsersAsync();
-        Task<IEnumerable<UserDTO>> GetUsersByRoleAsync(UserRole role);
+        Task<ICollection<UserDTO>> GetAllUsersAsync();
+        Task<ICollection<UserDTO>> GetUsersByRoleAsync(UserRole role);
         Task<UserDTO> GetUserByUsernameAsync(string username);
         Task<UserDTO> GetUserByIdAsync(int userId);
 
@@ -22,10 +22,10 @@ namespace Libro.Application.ServicesInterfaces
         Task<UserDTO> AuthenticateUserAsync(string username, string password);
         Task<bool> AssignRoleAsync(string username, UserRole userRole);
 
-        Task<List<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId);
-        Task<List<BookTransactionDTO>> GetCurrentLoansAsync(int patronId);
-        Task<List<BookTransactionDTO>> GetOverdueLoansAsync(int patronId);
-        Task<List<string>> FindMostFrequentGenresForUserAsync(int userId);
-        Task<IEnumerable<BookDTO>> GetUserRecommendationsAsync(int userId);
+        Task<ICollection<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId);
+        Task<ICollection<BookTransactionDTO>> GetCurrentLoansAsync(int patronId);
+        Task<ICollection<BookTransactionDTO>> GetOverdueLoansAsync(int patronId);
+        Task<ICollection<string>> FindMostFrequentGenresForUserAsync(int userId);
+        Task<ICollection<BookDTO>> GetUserRecommendationsAsync(int userId);
     }
 }

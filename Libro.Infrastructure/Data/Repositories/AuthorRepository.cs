@@ -1,5 +1,5 @@
 ﻿using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,7 +21,7 @@ namespace Libro.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Author>> GetAllAuthorsAsync()
+        public async Task<ICollection<Author>> GetAllAuthorsAsync()
         {
             try
             {

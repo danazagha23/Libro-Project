@@ -18,14 +18,18 @@ namespace Libro.Presentation.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly IReadingListService _readingListRepository;
         private readonly IMapper _mapper;
-        private readonly INotificationService _notificationService;
+        private readonly Application.ServicesInterfaces.IAuthenticationService _authenticationService;
 
-        public AccountController(IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper, INotificationService notificationService)
+        public AccountController(
+            IUserManagementService userManagementService,
+            IReadingListService readingListService,
+            IMapper mapper,
+            Application.ServicesInterfaces.IAuthenticationService authenticationService)
         {
             _userManagementService = userManagementService;
             _readingListRepository = readingListService;
             _mapper = mapper;
-            _notificationService = notificationService;
+            _authenticationService = authenticationService;
         }
 
 
@@ -92,9 +96,7 @@ namespace Libro.Presentation.Controllers
 
                     var principal = new ClaimsPrincipal(identity);
 
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        principal);
+                    await _authenticationService.SignInAsync(HttpContext, CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -123,9 +125,9 @@ namespace Libro.Presentation.Controllers
             var userProfile = new UserProfileViewModel
             {
                 User = userDTO,
-                BorrowingHistory = borrowingHistory,
-                CurrentLoans = currentLoans,
-                OverdueLoans = overdueLoans,
+                BorrowingHistory = borrowingHistory.ToList(),
+                CurrentLoans = currentLoans.ToList(),
+                OverdueLoans = overdueLoans.ToList(),
                 ReadingLists = readingLists.ToList() 
             };
 
@@ -136,7 +138,7 @@ namespace Libro.Presentation.Controllers
         {
             await HttpContext.SignOutAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme);
-            return Redirect("/");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

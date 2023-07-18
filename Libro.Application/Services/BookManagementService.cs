@@ -2,7 +2,7 @@
 using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,10 +23,10 @@ namespace Libro.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BookDTO>> GetAllBooksAsync()
+        public async Task<ICollection<BookDTO>> GetAllBooksAsync()
         {
             var books = await _bookRepository.GetAllBooksAsync();
-            var booksDTO = _mapper.Map<IEnumerable<BookDTO>>(books);
+            var booksDTO = _mapper.Map<ICollection<BookDTO>>(books);
 
             return booksDTO;
         }
@@ -66,11 +66,11 @@ namespace Libro.Application.Services
             return await _bookRepository.DeleteBookAuthorsByBookIdAsync(bookId);
         }
 
-        public async Task<List<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)
+        public async Task<ICollection<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)
         {
             var searchResults = await _bookRepository.FindBooksAsync(bookGenre, searchString, authorName, availabilityStatus);
 
-            return _mapper.Map<IEnumerable<BookDTO>>(searchResults).ToList();
+            return _mapper.Map<ICollection<BookDTO>>(searchResults).ToList();
         }
     }
 }

@@ -12,6 +12,6 @@ namespace Libro.Domain.Entities
         public string AuthorName { get; set; }
         public string? Biography { get; set; }
 
-        public IEnumerable<BookAuthor> BookAuthors { get; set; }
+        public ICollection<BookAuthor> BookAuthors { get; set; }
     }
 }

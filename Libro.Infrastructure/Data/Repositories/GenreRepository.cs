@@ -1,5 +1,5 @@
 ﻿using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -22,7 +22,7 @@ namespace Libro.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Genre>> GetAllGenresAsync()
+        public async Task<ICollection<Genre>> GetAllGenresAsync()
         {
             try
             {
@@ -38,7 +38,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Book>> GetBooksByGenreAsync(int genreId)
+        public async Task<ICollection<Book>> GetBooksByGenreAsync(int genreId)
         {
             try
             {

@@ -2,7 +2,7 @@
 using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +20,10 @@ namespace Libro.Application.Services
             _authorRepository = authorRepository;
             _mapper = mapper;
         }
-        public async Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync()
+        public async Task<ICollection<AuthorDTO>> GetAllAuthorsAsync()
         {
             var authors = await _authorRepository.GetAllAuthorsAsync();
-            var authorsDTO = _mapper.Map<IEnumerable<AuthorDTO>>(authors);
+            var authorsDTO = _mapper.Map<ICollection<AuthorDTO>>(authors);
 
             return authorsDTO;
         }

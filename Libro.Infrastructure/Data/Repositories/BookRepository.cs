@@ -1,6 +1,6 @@
 ﻿using Libro.Application.DTOs;
 using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,7 +24,7 @@ namespace Libro.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Book>> GetAllBooksAsync()
+        public async Task<ICollection<Book>> GetAllBooksAsync()
         {
             try
             {
@@ -181,7 +181,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<Book>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)
+        public async Task<ICollection<Book>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)
         {
             try
             {

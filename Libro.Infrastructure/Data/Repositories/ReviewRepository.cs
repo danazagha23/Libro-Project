@@ -22,7 +22,7 @@ namespace Libro.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Review>> GetReviewsByBookIdAsync(int bookId)
+        public async Task<ICollection<Review>> GetReviewsByBookIdAsync(int bookId)
         {
             try
             {

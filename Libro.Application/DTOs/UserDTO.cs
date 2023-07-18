@@ -15,8 +15,9 @@ namespace Libro.Application.DTOs
         public string Address { get; set; }
         public UserRole Role { get; set; }
 
-        public IEnumerable<ReadingListDTO> ReadingLists { get; set; }
-        public IEnumerable<NotificationDTO> Notifications { get; set; }
-        public IEnumerable<BookTransactionDTO> BookTransactions { get; set; }
+        public ICollection<ReadingListDTO> ReadingLists { get; set; }
+        public ICollection<NotificationDTO> Notifications { get; set; }
+        public ICollection<ReviewDTO> Reviews { get; set; }
+        public ICollection<BookTransactionDTO>? Transactions { get; set; }
     }
 }

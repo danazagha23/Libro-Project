@@ -26,7 +26,8 @@ namespace Libro.Presentation.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                notifications = _notificationService.GetNotificationsForUserAsync(userId).Result;
+                var _notification = _notificationService.GetNotificationsForUserAsync(userId).Result;
+                notifications = _notification.ToList();
             }
 
             var layoutViewModel = new LayoutViewModel

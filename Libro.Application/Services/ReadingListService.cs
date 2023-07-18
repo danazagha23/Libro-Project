@@ -25,10 +25,10 @@ namespace Libro.Application.Services
             return _mapper.Map<ReadingListDTO>(readingList);
         }
 
-        public async Task<IEnumerable<ReadingListDTO>> GetReadingListsByUserIdAsync(int userId)
+        public async Task<ICollection<ReadingListDTO>> GetReadingListsByUserIdAsync(int userId)
         {
             var readingLists = await _readingListRepository.GetReadingListsByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<ReadingListDTO>>(readingLists);
+            return _mapper.Map<ICollection<ReadingListDTO>>(readingLists);
         }
 
         public async Task<ReadingListDTO> CreateReadingListAsync(int userId)

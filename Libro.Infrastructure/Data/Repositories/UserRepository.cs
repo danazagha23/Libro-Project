@@ -1,7 +1,7 @@
 ﻿using Libro.Application.DTOs;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,13 +23,15 @@ namespace Libro.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<ICollection<User>> GetAllUsersAsync()
         {
             try
             {
                 _logger.LogInformation("Fetching all users from the database.");
                 return await _context.Users
                     .Include(u => u.ReadingLists)
+                    .Include(u => u.Notifications)
+                    .Include(u => u.Reviews)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -46,6 +48,8 @@ namespace Libro.Infrastructure.Data.Repositories
                 _logger.LogInformation("Fetching user by ID: {UserId} from the database.", userId);
                 var user = await _context.Users
                     .Include(u => u.ReadingLists)
+                    .Include(u => u.Notifications)
+                    .Include(u => u.Reviews)
                     .FirstOrDefaultAsync(u => u.UserId == userId);
 
                 return user;
@@ -64,6 +68,8 @@ namespace Libro.Infrastructure.Data.Repositories
                 _logger.LogInformation("Fetching user by username: {Username} from the database.", username);
                 var user = await _context.Users
                     .Include(u => u.ReadingLists)
+                    .Include(u => u.Notifications)
+                    .Include(u => u.Reviews)
                     .FirstOrDefaultAsync(u => u.Username == username);
 
                 return user;
@@ -75,13 +81,15 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role)
+        public async Task<ICollection<User>> GetUsersByRoleAsync(UserRole role)
         {
             try
             {
                 _logger.LogInformation("Fetching users by role: {Role} from the database.", role);
                 var users = await _context.Users
                     .Include(u => u.ReadingLists)
+                    .Include(u => u.Notifications)
+                    .Include(u => u.Reviews)
                     .Where(u => u.Role == role)
                     .ToListAsync();
 
@@ -154,7 +162,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> GetBorrowingHistoryAsync(int patronId)
+        public async Task<ICollection<BookTransaction>> GetBorrowingHistoryAsync(int patronId)
         {
             try
             {
@@ -172,7 +180,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> GetCurrentLoansAsync(int patronId)
+        public async Task<ICollection<BookTransaction>> GetCurrentLoansAsync(int patronId)
         {
             try
             {
@@ -190,7 +198,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> GetOverdueLoansAsync(int patronId)
+        public async Task<ICollection<BookTransaction>> GetOverdueLoansAsync(int patronId)
         {
             try
             {

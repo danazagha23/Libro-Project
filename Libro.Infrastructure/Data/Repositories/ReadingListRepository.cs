@@ -1,6 +1,5 @@
 ﻿using Libro.Application.DTOs;
 using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +41,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<ReadingList>> GetReadingListsByUserIdAsync(int userId)
+        public async Task<ICollection<ReadingList>> GetReadingListsByUserIdAsync(int userId)
         {
             try
             {

@@ -32,8 +32,4 @@
     <ProjectReference Include="..\Libro.Presentation\Libro.Presentation.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="System\Services\" />
-  </ItemGroup>
-
 </Project>

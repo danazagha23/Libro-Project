@@ -20,182 +20,216 @@ namespace Libro.Tests.Controllers
         private readonly Mock<IBookTransactionsService> _bookTransactionsServiceMock;
         private readonly Mock<IBookManagementService> _bookManagementServiceMock;
         private readonly Mock<IUserManagementService> _userManagementServiceMock;
-        private readonly BookTransactionsController _controller;
+        private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly BookTransactionsController _bookTransactionsController;
 
         public BookTransactionsControllerTests()
         {
             _bookTransactionsServiceMock = new Mock<IBookTransactionsService>();
             _bookManagementServiceMock = new Mock<IBookManagementService>();
             _userManagementServiceMock = new Mock<IUserManagementService>();
-            _controller = new BookTransactionsController(_bookTransactionsServiceMock.Object, _bookManagementServiceMock.Object, _userManagementServiceMock.Object);
+            _notificationServiceMock = new Mock<INotificationService>();
+            _bookTransactionsController = new BookTransactionsController(
+                _bookTransactionsServiceMock.Object,
+                _bookManagementServiceMock.Object,
+                _userManagementServiceMock.Object,
+                _notificationServiceMock.Object
+            );
         }
 
         [Fact]
-        public async Task Reserve_ValidBookIdAndPatronId_RedirectsToBookDetailsWithSuccessMessage()
+        public async Task Reserve_ValidBookId_ReturnsRedirectToAction()
         {
             // Arrange
-            var bookId = 1;
-            var patronId = 1;
-            var userId = "1";
+            int bookId = 1;
+            int patronId = 2;
 
-            var claims = new List<Claim>
+            var user = new UserDTO { UserId = patronId, Role = UserRole.Patron };
+            var book = new BookDTO { BookId = bookId, AvailabilityStatus = AvailabilityStatus.Available };
+
+            _bookTransactionsServiceMock.Setup(s => s.ReserveBookAsync(bookId, patronId)).Verifiable();
+            _userManagementServiceMock.Setup(s => s.GetUserByIdAsync(patronId)).ReturnsAsync(user);
+            _bookManagementServiceMock.Setup(s => s.GetBookByIdAsync(bookId)).ReturnsAsync(book);
+
+            var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, userId)
+                new Claim(ClaimTypes.NameIdentifier, patronId.ToString())
             };
-            var claimsIdentity = new ClaimsIdentity(claims);
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-            _controller.ControllerContext = new ControllerContext
+            _bookTransactionsController.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = claimsPrincipal
-                }
-            };
-
-            _bookTransactionsServiceMock.Setup(x => x.ReserveBookAsync(bookId, patronId)).Verifiable();
-
-            // Act
-            var result = await _controller.Reserve(bookId) as RedirectToActionResult;
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Details", result.ActionName);
-            Assert.Equal("Books", result.ControllerName);
-            Assert.Equal(bookId, result.RouteValues["id"]);
-        }
-
-        [Fact]
-        public async Task Reserve_InvalidUserId_ReturnsBadRequestWithErrorMessage()
-        {
-            // Arrange
-            var bookId = 1;
-            string userId = null;
-
-            var claims = new List<Claim>();
-            var claimsIdentity = new ClaimsIdentity(claims);
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = claimsPrincipal
-                }
+                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(claims)) }
             };
 
             // Act
-            var result = await _controller.Reserve(bookId) as BadRequestObjectResult;
+            var result = await _bookTransactionsController.Reserve(bookId);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal("User ID not found", result.Value);
-        }
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("BookDetails", redirectToActionResult.ActionName);
+            Assert.Equal("Books", redirectToActionResult.ControllerName);
+            Assert.Equal(bookId, redirectToActionResult.RouteValues["id"]);
 
-        //[Fact]
-        //public async Task Index_ReturnsViewResultWithTransactionsViewModel()
-        //{
-        //    // Arrange
-        //    var selectedType = "Type1";
-        //    var selectedPatron = "Patron1";
-        //    var selectedBook = "Book1";
-        //    var status = "Status1";
-        //    var page = 1;
-        //    var pageSize = 5;
-
-        //    var bookTransactions = new List<BookTransactionDTO>
-        //    {
-        //        new BookTransactionDTO { TransactionId = 1, PatronId = 1, BookId = 1, },
-        //        new BookTransactionDTO { TransactionId = 2, PatronId = 2, Book = 2, Status = "Status2" }
-        //    };
-
-        //    var searchResults = new List<BookTransactionDTO>
-        //    {
-        //        new BookTransactionDTO { TransactionId = 1, Type = "Type1", Patron = "Patron1", Book = "Book1", Status = "Status1" }
-        //    };
-
-        //    var users = new List<UserDTO>
-        //    {
-        //        new UserDTO { Role = UserRole.Patron }
-        //    };
-
-        //    var patrons = new List<UserDTO>
-        //    {
-        //        new UserDTO { Role = UserRole.Patron }
-        //    };
-
-        //    var books = new List<BookDTO>
-        //    {
-        //        new BookDTO { Title = "Book1" },
-        //        new BookDTO { Title = "Book2" }
-        //    };
-
-        //    _bookTransactionsServiceMock.Setup(x => x.GetAllBookTransactionsAsync()).ReturnsAsync(bookTransactions);
-        //    _bookTransactionsServiceMock.Setup(x => x.FindTransactionsAsync(selectedType, selectedPatron, selectedBook, status)).ReturnsAsync(searchResults);
-        //    _userManagementServiceMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(users);
-        //    _bookManagementServiceMock.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(books);
-
-        //    var transactionsViewModel = new BookTransactionsViewModel
-        //    {
-        //        Transactions = bookTransactions,
-        //        FilteredTransactions = searchResults,
-        //        Books = books,
-        //        Patrons = patrons,
-        //        SelectedBook = selectedBook,
-        //        SelectedPatron = selectedPatron,
-        //        SelectedType = selectedType,
-        //        PageNumber = page,
-        //        TotalPages = 1
-        //    };
-
-        //    // Act
-        //    var result = await _controller.Index(selectedType, selectedPatron, selectedBook, status, page, pageSize) as ViewResult;
-        //    var model = result?.Model as BookTransactionsViewModel;
-
-        //    // Assert
-        //    Assert.NotNull(result);
-        //    Assert.NotNull(model);
-        //    Assert.Equal(transactionsViewModel.Transactions.Count, model.Transactions.Count);
-        //    Assert.Equal(transactionsViewModel.FilteredTransactions.Count, model.FilteredTransactions.Count);
-        //    Assert.Equal(transactionsViewModel.Books.Count, model.Books.Count);
-        //    Assert.Equal(transactionsViewModel.Patrons.Count, model.Patrons.Count);
-        //    Assert.Equal(transactionsViewModel.SelectedBook, model.SelectedBook);
-        //    Assert.Equal(transactionsViewModel.SelectedPatron, model.SelectedPatron);
-        //    Assert.Equal(transactionsViewModel.SelectedType, model.SelectedType);
-        //    Assert.Equal(transactionsViewModel.PageNumber, model.PageNumber);
-        //    Assert.Equal(transactionsViewModel.TotalPages, model.TotalPages);
-        //}
-
-        [Fact]
-        public async Task CheckOut_ValidTransactionId_RedirectsToIndex()
-        {
-            // Arrange
-            var transactionId = 1;
-
-            _bookTransactionsServiceMock.Setup(x => x.CheckOutBookAsync(transactionId)).Verifiable();
-
-            // Act
-            var result = await _controller.CheckOut(transactionId) as RedirectToActionResult;
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Index", result.ActionName);
+            _bookTransactionsServiceMock.Verify();
+            _userManagementServiceMock.Verify();
+            _bookManagementServiceMock.Verify();
         }
 
         [Fact]
-        public async Task AcceptReturn_ValidTransactionId_RedirectsToIndex()
+        public async Task Reserve_InvalidBookId_ReturnsBadRequest()
         {
             // Arrange
-            var transactionId = 1;
+            int bookId = 1;
 
-            _bookTransactionsServiceMock.Setup(x => x.AcceptReturnAsync(transactionId)).Verifiable();
+            _bookTransactionsServiceMock.Setup(s => s.ReserveBookAsync(bookId, It.IsAny<int>()))
+                .ThrowsAsync(new Exception("Book not found"));
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "2")
+            };
+            _bookTransactionsController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(claims)) }
+            };
 
             // Act
-            var result = await _controller.AcceptReturn(transactionId) as RedirectToActionResult;
+            var result = await _bookTransactionsController.Reserve(bookId);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Index", result.ActionName);
+            var badRequestObjectResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Book not found", badRequestObjectResult.Value);
+
+            _bookTransactionsServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task Index_ReturnsViewWithTransactionsViewModel()
+        {
+            // Arrange
+            var transactions = new List<BookTransactionDTO>
+            {
+                new BookTransactionDTO { TransactionId = 1, TransactionType = TransactionType.Reserved },
+                new BookTransactionDTO { TransactionId = 2, TransactionType = TransactionType.Borrowed }
+            };
+            var filteredTransactions = new List<BookTransactionDTO>
+            {
+                new BookTransactionDTO { TransactionId = 2, TransactionType = TransactionType.Borrowed }
+            };
+            var books = new List<BookDTO>
+            {
+                new BookDTO { BookId = 1, Title = "Book 1" },
+                new BookDTO { BookId = 2, Title = "Book 2" }
+            };
+            var users = new List<UserDTO>
+            {
+                new UserDTO { UserId = 1, Role = UserRole.Patron },
+                new UserDTO { UserId = 2, Role = UserRole.Patron }
+            };
+            var selectedType = "Borrowed";
+            var selectedPatron = "1";
+            var selectedBook = "1";
+            var page = 1;
+            var pageSize = 5;
+
+            _bookTransactionsServiceMock.Setup(s => s.GetAllBookTransactionsAsync()).ReturnsAsync(transactions);
+            _bookTransactionsServiceMock.Setup(s => s.FindTransactionsAsync(selectedType, selectedPatron, selectedBook))
+                .ReturnsAsync(filteredTransactions);
+            _userManagementServiceMock.Setup(s => s.GetAllUsersAsync()).ReturnsAsync(users);
+            _bookManagementServiceMock.Setup(s => s.GetAllBooksAsync()).ReturnsAsync(books);
+
+            // Act
+            var result = await _bookTransactionsController.Index(selectedType, selectedPatron, selectedBook, page, pageSize);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var transactionsViewModel = Assert.IsType<BookTransactionsViewModel>(viewResult.Model);
+            Assert.Equal(transactions.Count(t => t.TransactionType.ToString() == selectedType), transactionsViewModel.FilteredTransactions.Count);
+            Assert.Equal(transactions, transactionsViewModel.Transactions);
+            Assert.Equal(books, transactionsViewModel.Books);
+            Assert.Equal(filteredTransactions, transactionsViewModel.FilteredTransactions);
+            Assert.Equal(users, transactionsViewModel.Patrons);
+            Assert.Equal(selectedType, transactionsViewModel.SelectedType);
+            Assert.Equal(selectedPatron, transactionsViewModel.SelectedPatron);
+            Assert.Equal(selectedBook, transactionsViewModel.SelectedBook);
+            Assert.Equal(page, transactionsViewModel.PageNumber);
+
+            _bookTransactionsServiceMock.Verify();
+            _userManagementServiceMock.Verify();
+            _bookManagementServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task CheckOut_ValidTransactionId_ReturnsRedirectToAction()
+        {
+            // Arrange
+            int transactionId = 1;
+
+            _bookTransactionsServiceMock.Setup(s => s.CheckOutBookAsync(transactionId)).Verifiable();
+
+            // Act
+            var result = await _bookTransactionsController.CheckOut(transactionId);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+
+            _bookTransactionsServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task CheckOut_InvalidTransactionId_ReturnsBadRequest()
+        {
+            // Arrange
+            int transactionId = 1;
+
+            _bookTransactionsServiceMock.Setup(s => s.CheckOutBookAsync(transactionId))
+                .ThrowsAsync(new Exception("Book transaction not found"));
+
+            // Act
+            var result = await _bookTransactionsController.CheckOut(transactionId);
+
+            // Assert
+            var badRequestObjectResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Book transaction not found", badRequestObjectResult.Value);
+
+            _bookTransactionsServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task AcceptReturn_ValidTransactionId_ReturnsRedirectToAction()
+        {
+            // Arrange
+            int transactionId = 1;
+
+            _bookTransactionsServiceMock.Setup(s => s.AcceptReturnAsync(transactionId)).Verifiable();
+
+            // Act
+            var result = await _bookTransactionsController.AcceptReturn(transactionId);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+
+            _bookTransactionsServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task AcceptReturn_InvalidTransactionId_ReturnsBadRequest()
+        {
+            // Arrange
+            int transactionId = 1;
+
+            _bookTransactionsServiceMock.Setup(s => s.AcceptReturnAsync(transactionId))
+                .ThrowsAsync(new Exception("Book transaction not found"));
+
+            // Act
+            var result = await _bookTransactionsController.AcceptReturn(transactionId);
+
+            // Assert
+            var badRequestObjectResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Book transaction not found", badRequestObjectResult.Value);
+
+            _bookTransactionsServiceMock.Verify();
         }
     }
 }

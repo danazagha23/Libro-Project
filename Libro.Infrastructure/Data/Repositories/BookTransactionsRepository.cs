@@ -40,7 +40,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> GetAllBookTransactionsAsync()
+        public async Task<ICollection<BookTransaction>> GetAllBookTransactionsAsync()
         {
             try
             {
@@ -71,7 +71,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> GetTransactionsByUserIdAsync(int userId)
+        public async Task<ICollection<BookTransaction>> GetTransactionsByUserIdAsync(int userId)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> GetTransactionsByBookIdAsync(int bookId)
+        public async Task<ICollection<BookTransaction>> GetTransactionsByBookIdAsync(int bookId)
         {
             try
             {
@@ -147,7 +147,7 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<List<BookTransaction>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook, string Status)
+        public async Task<ICollection<BookTransaction>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook)
         {
             try
             {
@@ -171,12 +171,6 @@ namespace Libro.Infrastructure.Data.Repositories
                 if (!string.IsNullOrEmpty(SelectedPatron))
                 {
                     transactions = transactions.Where(x => x.Patron.Username == SelectedPatron).ToList();
-                }
-
-                if (!string.IsNullOrEmpty(Status))
-                {
-                    bool isReturned = bool.Parse(Status);
-                    transactions = transactions.Where(t => t.IsReturned == isReturned).ToList();
                 }
 
                 return transactions.ToList();

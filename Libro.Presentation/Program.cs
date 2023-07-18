@@ -1,9 +1,9 @@
 using AutoMapper;
 using EFCore.NamingConventions.Internal;
+using Libro.Application.DTOs;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
-using Libro.Domain.Interfaces;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Libro.Infrastructure.Data.Repositories;
@@ -12,11 +12,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Scrutor;
 using Serilog;
 using System.Reflection;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +32,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API Documentation", Version = "v1" });
 });
-
 
 var assemblies = new[]
 {
@@ -90,6 +91,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+builder.Services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
+
+// Add the OverdueBookCheckService as a singleton service
+builder.Services.AddSingleton<IHostedService, OverdueBookCheckService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -117,8 +124,8 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 });
 
 app.Run();

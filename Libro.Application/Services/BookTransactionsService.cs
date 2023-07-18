@@ -3,7 +3,6 @@ using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
-using Libro.Domain.Interfaces;
 using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,7 @@ namespace Libro.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IBookTransactionsRepository _transactionsRepository;
         private readonly IMapper _mapper;
+
         public BookTransactionsService(IBookRepository bookRepository, IUserRepository userRepository, IBookTransactionsRepository transactionsRepository, IMapper mapper)
         {
             _bookRepository = bookRepository;
@@ -41,33 +41,13 @@ namespace Libro.Application.Services
             return await _transactionsRepository.DeleteTransactionAsync(transactionId);
         }
 
-        public async Task<List<BookTransactionDTO>> GetAllBookTransactionsAsync()
+        public async Task<ICollection<BookTransactionDTO>> GetAllBookTransactionsAsync()
         {
             var transactions = await _transactionsRepository.GetAllBookTransactionsAsync();
             var transactionsDTO = _mapper.Map<IEnumerable<BookTransactionDTO>>(transactions);
 
             return transactionsDTO.ToList();
         } 
-
-        public async Task<List<BookTransactionDTO>> GetTransactionsByUserIdAsync(int userId)
-        {
-            throw new NotImplementedException();
-        }  
-        
-        public async Task<BookTransactionDTO> GetTransactionByIdAsync(int transactionId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<BookTransactionDTO>> GetTransactionsByBookIdAsync(int bookId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<BookTransactionDTO> UpdateTransactionAsync(int transactionId, BookTransactionDTO transactionDTO)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task ReserveBookAsync(int bookId, int patronId)
         {
@@ -152,11 +132,11 @@ namespace Libro.Application.Services
             await _bookRepository.UpdateBookAsync(book.BookId, book);
         }
 
-        public async Task<List<BookTransactionDTO>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook, string Status)
+        public async Task<ICollection<BookTransactionDTO>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook)
         {
-            var searchResults = await _transactionsRepository.FindTransactionsAsync(selectedType, SelectedPatron, SelectedBook, Status);
+            var searchResults = await _transactionsRepository.FindTransactionsAsync(selectedType, SelectedPatron, SelectedBook);
 
-            return _mapper.Map<IEnumerable<BookTransactionDTO>>(searchResults).ToList();
+            return _mapper.Map<ICollection<BookTransactionDTO>>(searchResults).ToList();
         }
 
     }

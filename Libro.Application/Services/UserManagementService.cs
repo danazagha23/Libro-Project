@@ -3,7 +3,6 @@ using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
-using Libro.Domain.Interfaces;
 using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
@@ -34,10 +33,10 @@ namespace Libro.Application.Services
             _genreRepository = genreRepository;
         }
 
-        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+        public async Task<ICollection<UserDTO>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllUsersAsync();
-            var usersDTO = _mapper.Map<IEnumerable<UserDTO>>(users);
+            var usersDTO = _mapper.Map<ICollection<UserDTO>>(users);
 
             return usersDTO;
         }
@@ -58,10 +57,10 @@ namespace Libro.Application.Services
             return userDTO;
         }
 
-        public async Task<IEnumerable<UserDTO>> GetUsersByRoleAsync(UserRole role)
+        public async Task<ICollection<UserDTO>> GetUsersByRoleAsync(UserRole role)
         {
             var users = await _userRepository.GetUsersByRoleAsync(role);
-            var usersDTO = _mapper.Map<IEnumerable<UserDTO>>(users);
+            var usersDTO = _mapper.Map<ICollection<UserDTO>>(users);
 
             return usersDTO;
         }
@@ -162,28 +161,28 @@ namespace Libro.Application.Services
             return true;
         }
 
-        public async Task<List<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId)
+        public async Task<ICollection<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId)
         {
             var borrowingHistory = await _userRepository.GetBorrowingHistoryAsync(patronId);
 
-            return _mapper.Map<List<BookTransactionDTO>>(borrowingHistory);
+            return _mapper.Map<ICollection<BookTransactionDTO>>(borrowingHistory);
         }
 
-        public async Task<List<BookTransactionDTO>> GetCurrentLoansAsync(int patronId)
+        public async Task<ICollection<BookTransactionDTO>> GetCurrentLoansAsync(int patronId)
         {
             var currentLoans = await _userRepository.GetCurrentLoansAsync(patronId);
 
-            return _mapper.Map<List<BookTransactionDTO>>(currentLoans);
+            return _mapper.Map<ICollection<BookTransactionDTO>>(currentLoans);
         }
 
-        public async Task<List<BookTransactionDTO>> GetOverdueLoansAsync(int patronId)
+        public async Task<ICollection<BookTransactionDTO>> GetOverdueLoansAsync(int patronId)
         {
             var overdueLoans = await _userRepository.GetOverdueLoansAsync(patronId);
 
-            return _mapper.Map<List<BookTransactionDTO>>(overdueLoans);
+            return _mapper.Map<ICollection<BookTransactionDTO>>(overdueLoans);
         }
 
-        public async Task<List<string>> FindMostFrequentGenresForUserAsync(int userId)
+        public async Task<ICollection<string>> FindMostFrequentGenresForUserAsync(int userId)
         {
             var allGenres = await _genreRepository.GetAllGenresAsync();
             var genres = new List<string>();
@@ -213,12 +212,12 @@ namespace Libro.Application.Services
             return genres;
         }
 
-        public async Task<IEnumerable<BookDTO>> GetUserRecommendationsAsync(int userId)
+        public async Task<ICollection<BookDTO>> GetUserRecommendationsAsync(int userId)
         {
             
             var genres = await FindMostFrequentGenresForUserAsync(userId);
             var books = await _bookRepository.GetAllBooksAsync();
-            var bookDTOs = _mapper.Map<IEnumerable<BookDTO>>(books);
+            var bookDTOs = _mapper.Map<ICollection<BookDTO>>(books);
 
             var recommendationBooks = bookDTOs.Where(book => genres.Contains(book.Genre.Name));
 

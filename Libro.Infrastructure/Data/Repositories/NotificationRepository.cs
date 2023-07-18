@@ -1,4 +1,5 @@
-﻿using Libro.Domain.Entities;
+﻿using Libro.Application.ServicesInterfaces;
+using Libro.Domain.Entities;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
@@ -16,18 +17,19 @@ namespace Libro.Infrastructure.Data.Repositories
         private readonly LibroDbContext _context;
         private readonly ILogger<NotificationRepository> _logger;
 
-        public NotificationRepository(LibroDbContext context, ILogger<NotificationRepository> logger)
+        public NotificationRepository(IEmailService emailService, LibroDbContext context, ILogger<NotificationRepository> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        public async Task<List<Notification>> GetNotificationsForUserAsync(int userId)
+        public async Task<ICollection<Notification>> GetNotificationsForUserAsync(int userId)
         {
             try
             {
                 _logger.LogInformation("Fetching notifications for user ID: {UserId} from the database.", userId);
                 return await _context.Notifications
+                    .Include(u => u.User)
                     .Where(n => n.UserId == userId)
                     .OrderByDescending(n => n.CreatedAt)
                     .ToListAsync();
@@ -45,6 +47,7 @@ namespace Libro.Infrastructure.Data.Repositories
             {
                 _logger.LogInformation("Fetching unread notification count for user ID: {UserId} from the database.", userId);
                 return await _context.Notifications
+                    .Include(u => u.User)
                     .CountAsync(n => n.UserId == userId && !n.IsRead);
             }
             catch (Exception ex)
@@ -61,6 +64,7 @@ namespace Libro.Infrastructure.Data.Repositories
                 _logger.LogInformation("Creating a new notification in the database.");
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Notification created and email sent successfully.");
             }
             catch (Exception ex)
             {

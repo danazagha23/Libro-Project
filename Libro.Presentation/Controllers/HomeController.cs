@@ -30,13 +30,14 @@ namespace Libro.Presentation.Controllers
             var availableBooks = books.Where(b => b.AvailabilityStatus == AvailabilityStatus.Available);
             var notifications = new List<NotificationDTO>();
 
-            IEnumerable<BookDTO> bookRecommendations = new List<BookDTO>();
+            ICollection<BookDTO> bookRecommendations = new List<BookDTO>();
 
             if (User.Identity.IsAuthenticated)
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 bookRecommendations = await _userManagementService.GetUserRecommendationsAsync(userId);
-                notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+                var _notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+                notifications = _notifications.ToList();
             }
 
             var homeViewModel = new HomeViewModel

@@ -13,6 +13,6 @@ namespace Libro.Application.DTOs
         public string AuthorName { get; set; }
         public string? Biography { get; set; }
 
-        public IEnumerable<BookAuthorDTO> BookAuthors { get; set; }
+        public ICollection<BookAuthorDTO> BookAuthors { get; set; }
     }
 }
