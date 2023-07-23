@@ -18,6 +18,7 @@ namespace Libro.Application.DTOs
         public AvailabilityStatus AvailabilityStatus { get; set; }
 
         public ICollection<BookAuthorDTO> BookAuthors { get; set; }
+        public ICollection<ReadingListDTO> ReadingLists { get; set; }
         public GenreDTO Genre { get; set; }
     }
 }

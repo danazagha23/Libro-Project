@@ -18,6 +18,8 @@ namespace Libro.Domain.Entities
         public AvailabilityStatus AvailabilityStatus { get; set; } = AvailabilityStatus.Available;
 
         public ICollection<BookAuthor> BookAuthors { get; set; }
+        public ICollection<ReadingList> ReadingLists { get; set; }
         public Genre Genre { get; set; }
+
     }
 }

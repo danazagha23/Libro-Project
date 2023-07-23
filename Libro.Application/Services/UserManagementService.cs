@@ -4,6 +4,7 @@ using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +19,15 @@ namespace Libro.Application.Services
     public class UserManagementService : IUserManagementService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly IReadingListRepository _readingListRepository;
         private readonly IValidationService _validationService;
         private readonly IMapper _mapper;
-        public UserManagementService(IUserRepository userRepository, IValidationService validationService, IMapper mapper)
+        public UserManagementService(IUserRepository userRepository, IBookRepository bookRepository, IReadingListRepository readingListRepository, IValidationService validationService, IMapper mapper)
         {
             _userRepository = userRepository;
+            _bookRepository = bookRepository;
+            _readingListRepository = readingListRepository;
             _validationService = validationService;
             _mapper = mapper;
         }
@@ -61,6 +66,11 @@ namespace Libro.Application.Services
 
         public async Task<UserDTO> CreateUserAsync(UserDTO userDTO)
         {
+            if (userDTO == null)
+            {
+                throw new ArgumentNullException(nameof(userDTO));
+            }
+
             // Validation
             await _validationService.ValidateUsernameAsync(userDTO.Username, userDTO.UserId);
             _validationService.ValidatePassword(userDTO.Password);

@@ -1,4 +1,5 @@
-﻿using Libro.Domain.Entities;
+﻿using Libro.Application.DTOs;
+using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Domain.Interfaces;
 using Libro.Infrastructure.Data.DbContexts;
@@ -21,26 +22,35 @@ namespace Libro.Infrastructure.Data.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users
+                .Include(u => u.ReadingLists)
+                .ToListAsync();
         }
 
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .Include(u => u.ReadingLists)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
 
             return user;
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users
+                .Include(u => u.ReadingLists)
+                .FirstOrDefaultAsync(u => u.Username == username);
 
             return user;
         }
 
         public async Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role)
         {
-            var users = await _context.Users.Where(u => u.Role == role).ToListAsync();
+            var users = await _context.Users
+                .Include(u => u.ReadingLists)
+                .Where(u => u.Role == role)
+                .ToListAsync();
 
             return users;
         }

@@ -1,4 +1,6 @@
-﻿using Libro.Presentation.Models;
+﻿using Libro.Application.ServicesInterfaces;
+using Libro.Domain.Enums;
+using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -7,15 +9,25 @@ namespace Libro.Presentation.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IBookManagementService _bookManagementService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IBookManagementService bookManagementService)
         {
             _logger = logger;
+            _bookManagementService = bookManagementService;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var books = await _bookManagementService.GetAllBooksAsync();
+            var availableBooks = books.Where(b => b.AvailabilityStatus == AvailabilityStatus.Available);
+            var homeViewModel = new HomeViewModel
+            {
+                AvailableBooks = availableBooks
+            };
+
+            return View(homeViewModel);
         }
 
         public IActionResult Privacy()

@@ -17,8 +17,9 @@ namespace Libro.Domain.Entities
         public string LastName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-        public UserRole Role { get; set; } 
+        public UserRole Role { get; set; }
 
+        public IEnumerable<ReadingList> ReadingLists { get; set; }
         public IEnumerable<BookTransaction>? Transactions { get; set; }
     }
 }
