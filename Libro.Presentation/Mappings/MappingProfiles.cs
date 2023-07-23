@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Libro.Application.DTOs;
+using Libro.Domain.Entities;
 using Libro.Presentation.Models;
 
 namespace Libro.Presentation.Mappings

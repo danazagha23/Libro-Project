@@ -24,7 +24,8 @@ namespace Libro.Application.Services
 
         public async Task<IEnumerable<ReviewDTO>> GetReviewsByBookIdAsync(int bookId)
         {
-            return _mapper.Map<IEnumerable<ReviewDTO>>(await _reviewRepository.GetReviewsByBookIdAsync(bookId));
+            var reviews = await _reviewRepository.GetReviewsByBookIdAsync(bookId);
+            return _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
         }
 
         public async Task<double> GetAverageRatingForBookAsync(int bookId)

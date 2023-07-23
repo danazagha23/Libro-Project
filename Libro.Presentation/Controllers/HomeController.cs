@@ -13,12 +13,14 @@ namespace Libro.Presentation.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IBookManagementService _bookManagementService;
+        private readonly IUserManagementService _userManagementService;
         private readonly INotificationService _notificationService;
 
-        public HomeController(ILogger<HomeController> logger, IBookManagementService bookManagementService, INotificationService notificationService)
+        public HomeController(ILogger<HomeController> logger, IBookManagementService bookManagementService, IUserManagementService userManagementService, INotificationService notificationService)
         {
             _logger = logger;
             _bookManagementService = bookManagementService;
+            _userManagementService = userManagementService;
             _notificationService = notificationService;
         }
 
@@ -30,19 +32,24 @@ namespace Libro.Presentation.Controllers
 
             int unreadNotificationCount = 0;
             var notifications = new List<NotificationDTO>();
+            IEnumerable<BookDTO> bookRecommendations = new List<BookDTO>();
+
             if (User.Identity.IsAuthenticated)
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 unreadNotificationCount = await _notificationService.GetUnreadNotificationCountAsync(unreadNotificationCount);
                 notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+                bookRecommendations = await _userManagementService.GetUserRecommendationsAsync(userId);
             }
 
             var homeViewModel = new HomeViewModel
             {
                 AvailableBooks = availableBooks,
                 UnreadNotificationCount = unreadNotificationCount,
-                Notifications = notifications
+                Notifications = notifications,
+                BookRecommendations = bookRecommendations
             };
+
             return View(homeViewModel);
         }
 

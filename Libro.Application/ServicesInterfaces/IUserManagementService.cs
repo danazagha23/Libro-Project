@@ -25,5 +25,7 @@ namespace Libro.Application.ServicesInterfaces
         Task<List<BookTransactionDTO>> GetBorrowingHistoryAsync(int patronId);
         Task<List<BookTransactionDTO>> GetCurrentLoansAsync(int patronId);
         Task<List<BookTransactionDTO>> GetOverdueLoansAsync(int patronId);
+        Task<List<string>> FindMostFrequentGenresForUserAsync(int userId);
+        Task<IEnumerable<BookDTO>> GetUserRecommendationsAsync(int userId);
     }
 }
