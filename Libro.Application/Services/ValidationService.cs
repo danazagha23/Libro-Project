@@ -18,11 +18,11 @@ namespace Libro.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task ValidateUsernameAsync(string username)
+        public async Task ValidateUsernameAsync(string username, int userId)
         {
             // Check if username is taken
             var existingUser = await _userRepository.GetUserByUsernameAsync(username);
-            if (existingUser != null)
+            if (existingUser != null && existingUser.UserId != userId)
             {
                 throw new ArgumentException("Username is already taken");
             }

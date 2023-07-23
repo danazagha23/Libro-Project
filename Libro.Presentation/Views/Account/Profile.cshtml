@@ -4,13 +4,134 @@
     ViewData["Title"] = "Profile";
 }
 
-<h2>User Profile</h2>
-
-<div>
-    <h4>Username: @Model.Username</h4>
-    <h4>Email: @Model.Email</h4>
-    <h4>First Name: @Model.FirstName</h4>
-    <h4>Last Name: @Model.LastName</h4>
-    <h4>Phone Number: @Model.PhoneNumber</h4>
-    <h4>Address: @Model.Address</h4>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>@Model.User.Username</h4>
+                </div>
+                <div class="card-body">
+                    <h6>Email:</h6>
+                    <p>@Model.User.Email</p>
+                    <h6>First Name:</h6>
+                    <p>@Model.User.FirstName</p>
+                    <h6>Last Name:</h6>
+                    <p>@Model.User.LastName</p>
+                    <h6>Phone Number:</h6>
+                    <p>@Model.User.PhoneNumber</p>
+                    <h6>Address:</h6>
+                    <p>@Model.User.Address</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="history-tab" data-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="true">Borrowing History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="current-loans-tab" data-toggle="tab" href="#current-loans" role="tab" aria-controls="current-loans" aria-selected="false">Current Loans</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="overdue-loans-tab" data-toggle="tab" href="#overdue-loans" role="tab" aria-controls="overdue-loans" aria-selected="false">Overdue Loans</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-3" id="myTabContent">
+                <div class="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history-tab">
+                    @if (Model.BorrowingHistory.Count > 0)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Transaction Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.BorrowingHistory)
+                                {
+                                    <tr>
+                                        <td>@transaction.Book.Title</td>
+                                        <td>@transaction.TransactionDate.ToString("d")</td>
+                                        <td>@transaction.DueDate.ToString("d")</td>
+                                        <td>@transaction.TransactionType</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No borrowing history found.</p>
+                    }
+                </div>
+                <div class="tab-pane fade" id="current-loans" role="tabpanel" aria-labelledby="current-loans-tab">
+                    @if (Model.CurrentLoans.Count > 0)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var loan in Model.CurrentLoans)
+                                {
+                                    <tr>
+                                        <td>@loan.Book.Title</td>
+                                        <td>@loan.DueDate.ToString("d")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No current loans found.</p>
+                    }
+                </div>
+                <div class="tab-pane fade" id="overdue-loans" role="tabpanel" aria-labelledby="overdue-loans-tab">
+                    @if (Model.OverdueLoans.Count > 0)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var loan in Model.OverdueLoans)
+                                {
+                                    <tr>
+                                        <td>@loan.Book.Title</td>
+                                        <td>@loan.DueDate.ToString("d")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No overdue loans found.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#myTab a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
+    </script>
+}
