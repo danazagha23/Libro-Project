@@ -23,9 +23,10 @@ namespace Libro.Presentation.Controllers
         private readonly IAuthorManagementService _authorManagementService;
         private readonly IUserManagementService _userManagementService;
         private readonly IReadingListService _readingListService;
+        private readonly IReviewService _reviewService;
         private readonly IMapper _mapper;
 
-        public BooksController(IBookManagementService bookManagementService, IGenreManagementService genreManagementService,IAuthorManagementService authorManagementService,IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper)
+        public BooksController(IBookManagementService bookManagementService, IGenreManagementService genreManagementService,IAuthorManagementService authorManagementService, IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper, IReviewService reviewService)
         {
             _bookManagementService = bookManagementService;
             _genreManagementService = genreManagementService;
@@ -33,6 +34,7 @@ namespace Libro.Presentation.Controllers
             _userManagementService = userManagementService;
             _readingListService = readingListService;
             _mapper = mapper;
+            _reviewService = reviewService;
         }
 
         [HttpGet]
@@ -68,18 +70,24 @@ namespace Libro.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> BookDetails(int id)
         {
-            // Get the currently logged-in user
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            // Check if the book is in the user's reading list
-            var readingLists = await _readingListService.GetReadingListsByUserIdAsync(userId);
-            var readingList = readingLists.FirstOrDefault();
-
             var isBookInReadingList = false;
-            if (readingList != null)
+            if (User.Identity.IsAuthenticated)
             {
-                isBookInReadingList = await _readingListService.IsBookInReadingListAsync(readingList.Id, id);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+
+                var readingLists = await _readingListService.GetReadingListsByUserIdAsync(userId);
+                var readingList = readingLists.FirstOrDefault();
+
+                
+                if (readingList != null)
+                {
+                    isBookInReadingList = await _readingListService.IsBookInReadingListAsync(readingList.Id, id);
+                }
             }
+
+            var reviews = await _reviewService.GetReviewsByBookIdAsync(id);
+            var averageRating = await _reviewService.GetAverageRatingForBookAsync(id);
 
             var book = await _bookManagementService.GetBookByIdAsync(id);
 
@@ -91,6 +99,8 @@ namespace Libro.Presentation.Controllers
             var detailsViewModel = _mapper.Map<BookDetailsViewModel>(book);
             detailsViewModel.Genre = book.Genre;
             detailsViewModel.IsBookInReadingList = isBookInReadingList;
+            detailsViewModel.Reviews = reviews;
+            detailsViewModel.averageRating = averageRating;
 
             return View(detailsViewModel);
 
@@ -282,6 +292,35 @@ namespace Libro.Presentation.Controllers
             }
 
             return Redirect(returnUrl);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddReview(int bookId, int rating, string comment)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _userManagementService.GetUserByIdAsync(userId);
+
+            // Get the book
+            var book = await _bookManagementService.GetBookByIdAsync(bookId);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            // Create the review
+            var review = new ReviewDTO
+            {
+                UserId = user.UserId,
+                BookId = book.BookId,
+                Rating = rating,
+                Comment = comment,
+                ReviewDate = DateTime.Now
+            };
+
+            await _reviewService.CreateReviewAsync(review);
+            
+            return RedirectToAction("BookDetails", new { id = bookId });
         }
 
     }

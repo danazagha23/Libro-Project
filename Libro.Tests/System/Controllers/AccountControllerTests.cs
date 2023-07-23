@@ -20,7 +20,7 @@ namespace Libro.Tests.Controllers
         {
             _userServiceMock = new Mock<IUserManagementService>();
             _mapperMock = new Mock<IMapper>();
-            _controller = new AccountController(_userServiceMock.Object, _mapperMock.Object);
+            //_controller = new AccountController(_userServiceMock.Object, _mapperMock.Object);
         }
 
         [Fact]

@@ -20,6 +20,8 @@ namespace Libro.Application.Mappings
             CreateMap<Genre, GenreDTO>().ReverseMap();
             CreateMap<BookTransaction, BookTransactionDTO>().ReverseMap();
             CreateMap<ReadingList, ReadingListDTO>().ReverseMap();
+            CreateMap<Review, ReviewDTO>().ReverseMap();
+            CreateMap<Notification, NotificationDTO>().ReverseMap();
         }
     }
 }

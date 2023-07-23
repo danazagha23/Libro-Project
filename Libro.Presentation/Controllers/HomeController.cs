@@ -1,8 +1,11 @@
-﻿using Libro.Application.ServicesInterfaces;
+﻿using Libro.Application.DTOs;
+using Libro.Application.Services;
+using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace Libro.Presentation.Controllers
 {
@@ -10,11 +13,13 @@ namespace Libro.Presentation.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IBookManagementService _bookManagementService;
+        private readonly INotificationService _notificationService;
 
-        public HomeController(ILogger<HomeController> logger, IBookManagementService bookManagementService)
+        public HomeController(ILogger<HomeController> logger, IBookManagementService bookManagementService, INotificationService notificationService)
         {
             _logger = logger;
             _bookManagementService = bookManagementService;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -22,11 +27,22 @@ namespace Libro.Presentation.Controllers
         {
             var books = await _bookManagementService.GetAllBooksAsync();
             var availableBooks = books.Where(b => b.AvailabilityStatus == AvailabilityStatus.Available);
+
+            int unreadNotificationCount = 0;
+            var notifications = new List<NotificationDTO>();
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                unreadNotificationCount = await _notificationService.GetUnreadNotificationCountAsync(unreadNotificationCount);
+                notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+            }
+
             var homeViewModel = new HomeViewModel
             {
-                AvailableBooks = availableBooks
+                AvailableBooks = availableBooks,
+                UnreadNotificationCount = unreadNotificationCount,
+                Notifications = notifications
             };
-
             return View(homeViewModel);
         }
 

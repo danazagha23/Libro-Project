@@ -13,6 +13,7 @@ namespace Libro.Presentation.Mappings
             CreateMap<BookDetailsViewModel, BookDTO>().ReverseMap();
             CreateMap<EditUserViewModel, UserDTO>().ReverseMap();
             CreateMap<AuthorViewModel, AuthorDTO>().ReverseMap();
+            CreateMap<NotificationViewModel, NotificationDTO>().ReverseMap();
         }
     }
 }

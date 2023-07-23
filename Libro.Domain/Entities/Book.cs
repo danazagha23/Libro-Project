@@ -19,6 +19,7 @@ namespace Libro.Domain.Entities
 
         public ICollection<BookAuthor> BookAuthors { get; set; }
         public ICollection<ReadingList> ReadingLists { get; set; }
+        public ICollection<Review> Reviews { get; set; }
         public Genre Genre { get; set; }
 
     }

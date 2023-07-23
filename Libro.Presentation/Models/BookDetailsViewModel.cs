@@ -12,6 +12,8 @@ namespace Libro.Presentation.Models
         public int GenreId { get; set; }
         public AvailabilityStatus AvailabilityStatus { get; set; }
 
+        public double averageRating { get; set; }
+        public IEnumerable<ReviewDTO> Reviews { get; set; }
         public IEnumerable<BookAuthorDTO> BookAuthors { get; set; }
         public GenreDTO Genre { get; set; }
 

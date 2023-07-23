@@ -18,13 +18,16 @@ namespace Libro.Presentation.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly IReadingListService _readingListRepository;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
-        public AccountController(IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper)
+        public AccountController(IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper, INotificationService notificationService)
         {
             _userManagementService = userManagementService;
             _readingListRepository = readingListService;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
+
 
         [HttpGet]
         public IActionResult Register()
@@ -135,6 +138,26 @@ namespace Libro.Presentation.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme);
             return Redirect("/");
         }
+
+        [Authorize(Roles = "Patron")]
+        [HttpGet]
+        public async Task<IActionResult> Notifications()
+        {
+            int unreadNotificationCount = 0;
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            unreadNotificationCount = await _notificationService.GetUnreadNotificationCountAsync(userId);
+        
+            var notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+            var model = new NotificationsViewModel
+            {
+                Notifications = notifications,
+                UnreadNotificationCount = unreadNotificationCount
+            };
+
+            return View(model);
+        }
+
 
     }
 }

@@ -20,6 +20,7 @@ namespace Libro.Domain.Entities
         public UserRole Role { get; set; }
 
         public IEnumerable<ReadingList> ReadingLists { get; set; }
+        public IEnumerable<Review> Notifications { get; set; }
         public IEnumerable<BookTransaction>? Transactions { get; set; }
     }
 }
