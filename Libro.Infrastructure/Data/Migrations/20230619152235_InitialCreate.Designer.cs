@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Libro.Infrastructure.Migrations
 {
     [DbContext(typeof(LibroDbContext))]
-    [Migration("20230611151116_InitialCreate")]
+    [Migration("20230619152235_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,21 +24,6 @@ namespace Libro.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AuthorBook", b =>
-                {
-                    b.Property<int>("AuthorsAuthorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BooksBookId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AuthorsAuthorId", "BooksBookId");
-
-                    b.HasIndex("BooksBookId");
-
-                    b.ToTable("AuthorBook");
-                });
 
             modelBuilder.Entity("Libro.Domain.Entities.Author", b =>
                 {
@@ -67,9 +52,6 @@ namespace Libro.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookId"));
-
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("int");
 
                     b.Property<int>("AvailabilityStatus")
                         .HasColumnType("int");
@@ -212,21 +194,6 @@ namespace Libro.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("AuthorBook", b =>
-                {
-                    b.HasOne("Libro.Domain.Entities.Author", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorsAuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Libro.Domain.Entities.Book", null)
-                        .WithMany()
-                        .HasForeignKey("BooksBookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Libro.Domain.Entities.Book", b =>
                 {
                     b.HasOne("Libro.Domain.Entities.Genre", "Genre")
@@ -240,21 +207,21 @@ namespace Libro.Infrastructure.Migrations
 
             modelBuilder.Entity("Libro.Domain.Entities.BookAuthor", b =>
                 {
-                    b.HasOne("Libro.Domain.Entities.Author", "author")
-                        .WithMany()
+                    b.HasOne("Libro.Domain.Entities.Author", "Author")
+                        .WithMany("BookAuthors")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Libro.Domain.Entities.Book", "book")
-                        .WithMany()
+                    b.HasOne("Libro.Domain.Entities.Book", "Book")
+                        .WithMany("BookAuthors")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("author");
+                    b.Navigation("Author");
 
-                    b.Navigation("book");
+                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("Libro.Domain.Entities.BookTransaction", b =>
@@ -274,6 +241,16 @@ namespace Libro.Infrastructure.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Patron");
+                });
+
+            modelBuilder.Entity("Libro.Domain.Entities.Author", b =>
+                {
+                    b.Navigation("BookAuthors");
+                });
+
+            modelBuilder.Entity("Libro.Domain.Entities.Book", b =>
+                {
+                    b.Navigation("BookAuthors");
                 });
 
             modelBuilder.Entity("Libro.Domain.Entities.Genre", b =>

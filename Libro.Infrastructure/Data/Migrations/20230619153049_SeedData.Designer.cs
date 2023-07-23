@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Libro.Infrastructure.Migrations
 {
     [DbContext(typeof(LibroDbContext))]
-    [Migration("20230611151958_SeedData")]
+    [Migration("20230619153049_SeedData")]
     partial class SeedData
     {
         /// <inheritdoc />
@@ -24,21 +24,6 @@ namespace Libro.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AuthorBook", b =>
-                {
-                    b.Property<int>("AuthorsAuthorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BooksBookId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AuthorsAuthorId", "BooksBookId");
-
-                    b.HasIndex("BooksBookId");
-
-                    b.ToTable("AuthorBook");
-                });
 
             modelBuilder.Entity("Libro.Domain.Entities.Author", b =>
                 {
@@ -94,9 +79,6 @@ namespace Libro.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookId"));
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("int");
-
                     b.Property<int>("AvailabilityStatus")
                         .HasColumnType("int");
 
@@ -124,7 +106,6 @@ namespace Libro.Infrastructure.Migrations
                         new
                         {
                             BookId = 1,
-                            AuthorId = 1,
                             AvailabilityStatus = 0,
                             Description = "The first book in the Harry Potter series.",
                             GenreId = 1,
@@ -134,7 +115,6 @@ namespace Libro.Infrastructure.Migrations
                         new
                         {
                             BookId = 2,
-                            AuthorId = 2,
                             AvailabilityStatus = 0,
                             Description = "The first book in the A Song of Ice and Fire series.",
                             GenreId = 1,
@@ -144,7 +124,6 @@ namespace Libro.Infrastructure.Migrations
                         new
                         {
                             BookId = 3,
-                            AuthorId = 3,
                             AvailabilityStatus = 0,
                             Description = "A classic detective novel featuring Hercule Poirot.",
                             GenreId = 2,
@@ -154,7 +133,6 @@ namespace Libro.Infrastructure.Migrations
                         new
                         {
                             BookId = 4,
-                            AuthorId = 4,
                             AvailabilityStatus = 0,
                             Description = "A horror novel set in an isolated hotel.",
                             GenreId = 3,
@@ -184,6 +162,32 @@ namespace Libro.Infrastructure.Migrations
                     b.HasIndex("BookId");
 
                     b.ToTable("BookAuthors");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AuthorId = 1,
+                            BookId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AuthorId = 2,
+                            BookId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AuthorId = 3,
+                            BookId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AuthorId = 4,
+                            BookId = 4
+                        });
                 });
 
             modelBuilder.Entity("Libro.Domain.Entities.BookTransaction", b =>
@@ -297,21 +301,6 @@ namespace Libro.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("AuthorBook", b =>
-                {
-                    b.HasOne("Libro.Domain.Entities.Author", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorsAuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Libro.Domain.Entities.Book", null)
-                        .WithMany()
-                        .HasForeignKey("BooksBookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Libro.Domain.Entities.Book", b =>
                 {
                     b.HasOne("Libro.Domain.Entities.Genre", "Genre")
@@ -325,21 +314,21 @@ namespace Libro.Infrastructure.Migrations
 
             modelBuilder.Entity("Libro.Domain.Entities.BookAuthor", b =>
                 {
-                    b.HasOne("Libro.Domain.Entities.Author", "author")
-                        .WithMany()
+                    b.HasOne("Libro.Domain.Entities.Author", "Author")
+                        .WithMany("BookAuthors")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Libro.Domain.Entities.Book", "book")
-                        .WithMany()
+                    b.HasOne("Libro.Domain.Entities.Book", "Book")
+                        .WithMany("BookAuthors")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("author");
+                    b.Navigation("Author");
 
-                    b.Navigation("book");
+                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("Libro.Domain.Entities.BookTransaction", b =>
@@ -359,6 +348,16 @@ namespace Libro.Infrastructure.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Patron");
+                });
+
+            modelBuilder.Entity("Libro.Domain.Entities.Author", b =>
+                {
+                    b.Navigation("BookAuthors");
+                });
+
+            modelBuilder.Entity("Libro.Domain.Entities.Book", b =>
+                {
+                    b.Navigation("BookAuthors");
                 });
 
             modelBuilder.Entity("Libro.Domain.Entities.Genre", b =>

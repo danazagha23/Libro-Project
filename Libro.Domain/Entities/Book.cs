@@ -15,10 +15,9 @@ namespace Libro.Domain.Entities
         public string Description { get; set; }
         public DateTime PublicationDate { get; set; }
         public int GenreId { get; set; }
-        public int AuthorId { get; set; }
         public AvailabilityStatus AvailabilityStatus { get; set; } = AvailabilityStatus.Available;
 
-        public IEnumerable<Author> Authors { get; set; }
+        public IEnumerable<BookAuthor> BookAuthors { get; set; }
         public Genre Genre { get; set; }
     }
 }
