@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Libro.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,8 +11,8 @@ namespace Libro.Application.DTOs
     {
         public int AuthorId { get; set; }
         public string AuthorName { get; set; }
-        public string Biography { get; set; }
+        public string? Biography { get; set; }
 
-        public IEnumerable<BookDTO> Books { get; set; }
+        public ICollection<BookAuthorDTO> BookAuthors { get; set; }
     }
 }

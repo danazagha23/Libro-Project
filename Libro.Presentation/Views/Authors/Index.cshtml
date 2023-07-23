@@ -1,0 +1,90 @@
+﻿@model AuthorsViewModel
+
+<h1>All Authors</h1>
+<form asp-controller="Authors" asp-action="Index" method="get">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="selectedAuthor">Author Name:</label>
+                <input type="text" list="authorNames" id="selectedAuthor" name="selectedAuthor" class="form-control" value="@Model.SelectedAuthor" placeholder="Enter author name" />
+                <datalist id="authorNames">
+                    @foreach (var author in Model.Authors.Take(50))
+                    {
+                        <option value="@author.AuthorName">@author.AuthorName</option>
+                    }
+                </datalist>
+            </div>
+        </div>
+        <div class="col-md-5 d-flex align-items-end">
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="table-responsive">
+    @if (Model.Authors.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Author Name</th>
+                    <th>Biography</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var authorProfile in Model.FilteredAuthors)
+                {
+                    <tr>
+                        <td>@authorProfile.AuthorName</td>
+                        <td>@authorProfile.Biography</td>
+                        <td>
+                            <a href="@Url.Action("EditAuthor", new { authorId = authorProfile.AuthorId })">Edit</a>
+                        </td>
+                        <td>
+                            <form asp-controller="Authors" asp-action="DeleteAuthor" method="post">
+                                <input type="hidden" name="authorId" value="@authorProfile.AuthorId" />
+                                <button type="submit" class="btn btn-primary">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No authors found.</p>
+    }
+
+    <nav>
+        <ul class="pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1, SelectedAuthor = Model.SelectedAuthor})">Previous</a>
+                </li>
+            }
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i , SelectedAuthor = Model.SelectedAuthor})">@i</a>
+
+                </li>
+            }
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1 , SelectedPatron = Model.SelectedAuthor})">Next</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function clearFilters() {
+        document.getElementById("selectedAuthor").value = "";
+    }
+</script>

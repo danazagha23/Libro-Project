@@ -2,12 +2,14 @@
 using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Libro.Application.Services
 {
@@ -20,10 +22,11 @@ namespace Libro.Application.Services
             _bookRepository = bookRepository;
             _mapper = mapper;
         }
-        public async Task<IEnumerable<BookDTO>> GetAllBooksAsync()
+
+        public async Task<ICollection<BookDTO>> GetAllBooksAsync()
         {
             var books = await _bookRepository.GetAllBooksAsync();
-            var booksDTO = _mapper.Map<IEnumerable<BookDTO>>(books);
+            var booksDTO = _mapper.Map<ICollection<BookDTO>>(books);
 
             return booksDTO;
         }
@@ -41,6 +44,12 @@ namespace Libro.Application.Services
 
             return _mapper.Map<BookDTO>(book);
         }
+        public async Task<BookAuthorDTO> CreateBookAuthorAsync(int bookId, int authorId)
+        {
+            var bookAuthor = await _bookRepository.CreateBookAuthorAsync(bookId, authorId);
+
+            return _mapper.Map<BookAuthorDTO>(bookAuthor);
+        }
         public async Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO)
         {
             var book = _mapper.Map<Book>(bookDTO);
@@ -51,6 +60,17 @@ namespace Libro.Application.Services
         public async Task<bool> DeleteBookAsync(int bookId)
         {
             return await _bookRepository.DeleteBookAsync(bookId);
+        }
+        public async Task<bool> DeleteBookAuthorsByBookIdAsync(int bookId)
+        {
+            return await _bookRepository.DeleteBookAuthorsByBookIdAsync(bookId);
+        }
+
+        public async Task<ICollection<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)
+        {
+            var searchResults = await _bookRepository.FindBooksAsync(bookGenre, searchString, authorName, availabilityStatus);
+
+            return _mapper.Map<ICollection<BookDTO>>(searchResults).ToList();
         }
     }
 }

@@ -1,0 +1,61 @@
+﻿@model EditBookViewModel
+
+@{
+    ViewData["Title"] = "EditBook";
+}
+
+<h2>Edit Book Details</h2>
+
+<form asp-action="EditBook" method="post">
+    <input type="hidden" asp-for="BookId" />
+
+    <div class="form-group">
+        <label asp-for="Title">Title</label>
+        <input type="text" asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description">Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PublicationDate">Publication Date</label>
+        <input type="date" asp-for="PublicationDate" class="form-control" />
+        <span asp-validation-for="PublicationDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SelectedGenre">Genre</label>
+        <select asp-for="SelectedGenre" class="form-control">
+            @foreach (var genre in Model.AllGenres)
+            {
+               <option value="@genre.Name">@genre.Name</option>
+            }
+        </select>
+        <span asp-validation-for="SelectedGenre" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="SelectedAuthors">Authors</label>
+        <select asp-for="SelectedAuthors" class="form-control" multiple>       
+            @foreach (var author in Model.AllAuthors)
+            {
+                <option value="@author.AuthorName">@author.AuthorName</option>
+            }
+        </select>
+        <span asp-validation-for="SelectedAuthors" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AvailabilityStatus">Availability Status</label>
+        <select asp-for="AvailabilityStatus" class="form-control">
+            <option value="Available">Available</option>
+            <option value="Unavailable">Unavailable</option>
+        </select>
+        <span asp-validation-for="AvailabilityStatus" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

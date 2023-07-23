@@ -10,6 +10,6 @@ namespace Libro.Application.DTOs
     {
         public int GenreId { get; set; }
         public string Name { get; set; }
-        public IEnumerable<BookDTO> Books { get; set; }
+        public ICollection<BookDTO> Books { get; set; }
     }
 }

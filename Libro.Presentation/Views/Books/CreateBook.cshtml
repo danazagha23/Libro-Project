@@ -1,0 +1,54 @@
+﻿@model CreateBookViewModel
+
+@{
+    ViewData["Title"] = "CreateBook";
+}
+
+<h2>Add New Book</h2>
+
+<form asp-controller="Books" asp-action="CreateBook" method="post">
+    <div class="form-group">
+        <label asp-for="Title">Title</label>
+        <input type="text" asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description">Description</label>
+        <input type="text" asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PublicationDate">PublicationDate</label>
+        <input type="date" asp-for="PublicationDate" class="form-control" />
+        <span asp-validation-for="PublicationDate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label for="availabilityStatus">Availability:</label>
+        <select id="availabilityStatus" name="availabilityStatus" class="form-control">
+            <option value="">Any</option>
+            <option value="Available">Available</option>
+            <option value="Unavailable">Unavailable</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="SelectedGenre">Genre:</label>
+        <select id="SelectedGenre" name="SelectedGenre" class="form-control">
+            <option value="" selected>Choose genre</option>
+            @foreach (var item in Model.Genres)
+            {
+                <option value="@item.Name">@item.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="SelectedAuthors">Authors:</label>
+        <select id="SelectedAuthors" name="SelectedAuthors" class="form-control" multiple>
+            @foreach (var author in Model.Authors.Take(50))
+            {
+                <option value="@author.AuthorName">@author.AuthorName</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

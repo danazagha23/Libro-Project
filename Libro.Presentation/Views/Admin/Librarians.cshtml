@@ -1,0 +1,91 @@
+﻿@model UsersViewModel
+
+<h1>All Librarians</h1>
+<form asp-controller="Admin" asp-action="Librarians" method="get">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="selectedLibrarian">Librarian Username:</label>
+                <input type="text" list="librarianNames" id="selectedLibrarian" name="selectedLibrarian" class="form-control" value="@Model.SelectedUser" placeholder="Enter librarian username" />
+                <datalist id="librarianNames">
+                    @foreach (var lib in Model.Users.Take(50))
+                    {
+                        <option value="@lib.Username">@lib.Username</option>
+                    }
+                </datalist>
+            </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="table-responsive">
+    @if (Model.Users.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>PhoneNumber</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var userProfile in Model.FilteredUsers)
+                {
+                    <tr>
+                        <td>@userProfile.Username</td>
+                        <td>@userProfile.Email</td>
+                        <td>@userProfile.FirstName</td>
+                        <td>@userProfile.LastName</td>
+                        <td>@userProfile.PhoneNumber</td>
+                        <td>@userProfile.Address</td>
+                        <td>
+                            <a href="@Url.Action("EditUser", new { userId = userProfile.UserId })">Edit Profile</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No librarians found.</p>
+    }
+
+    <nav>
+        <ul class="pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Librarians", new { page = Model.PageNumber - 1, SelectedLibrarian = Model.SelectedUser})">Previous</a>
+                </li>
+            }
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Librarians", new { page = i , SelectedLibrarian = Model.SelectedUser})">@i</a>
+                </li>
+            }
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Librarians", new { page = Model.PageNumber + 1 , SelectedLibrarian = Model.SelectedUser})">Next</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function clearFilters() {
+        document.getElementById("selectedLibrarian").value = "";
+    }
+</script>

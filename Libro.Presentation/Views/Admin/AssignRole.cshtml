@@ -1,0 +1,31 @@
+﻿@model AssignRoleViewModel
+
+@{
+    ViewData["Title"] = "AssignRole";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Assign Role</h2>
+            <form asp-controller="Admin" asp-action="AssignRole" method="post">
+                <div class="form-group">
+                    <label for="Username">Username:</label>
+                    <input type="text" id="Username" name="Username" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Role">Role:</label>
+                    <select id="Role" name="Role" class="form-control">
+                        <option value="Administrator">Administrator</option>
+                        <option value="Librarian">Librarian</option>
+                        <option value="Patron">Patron</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Assign Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

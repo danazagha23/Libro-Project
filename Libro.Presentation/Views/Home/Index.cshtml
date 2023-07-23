@@ -1,8 +1,149 @@
-﻿@{
+﻿@model HomeViewModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+    @if (!User.Identity.IsAuthenticated || User.IsInRole("Patron"))
+    {
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row jumbotron">
+                    <div class="col-lg-8">
+                        <h1 class="display-2">Welcome to Libro</h1>
+                        <p class="lead">Explore the world of books and reading</p>
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <a class="btn btn-light btn-lg" href="@Url.Action("Register", "Account")" role="button">Get Started</a>
+                        }
+                    </div>
+                    <div class="col-sm-4">
+                        <img src="~/book.jpg" alt="Image" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="container">
+            <h2 class="text-md-start mb-4">Browse Available Books</h2>
+            <div class="row">
+                @foreach (var book in Model.AvailableBooks.Take(9))
+                {
+                    <div class="col-sm-4 mb-4">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <h5 class="card-title">@book.Title</h5>
+                                <p class="card-text">@book.Description</p>
+                                <a href="@Url.Action("BookDetails", "Books", new { id = book.BookId })" class="btn btn-outline-dark">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="col-12 text-center mt-4">
+                    <a class="btn btn-dark btn-lg" href="@Url.Action("Search", "Books")" role="button">See All Books</a>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <h2 class="text-md-start mb-4">Book Recommendations</h2>
+            <div class="row">
+                @foreach (var book in Model.BookRecommendations)
+                {
+                    <div class="col-sm-4 mb-4">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <h5 class="card-title">@book.Title</h5>
+                                <p class="card-text">@book.Description</p>
+                                <a href="@Url.Action("BookDetails", "Books", new { id = book.BookId })" class="btn btn-outline-dark">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+
+<div class="container">
+    <div class="row">
+        @if (User.IsInRole("Librarian") || User.IsInRole("Administrator"))
+        {
+            <div class="col-md-6 col-lg-6">
+                <div class="card shadow mb-3">
+                    <div class="card-header">Books</div>
+                    <div class="card-body">
+                        <h5 class="card-title">All Books</h5>
+                        <p class="card-text">Explore the collection of books available in the library.</p>
+                        <a href="@Url.Action("Search", "Books")" class="btn btn-outline-dark">View All Books</a>
+                        @if (User.IsInRole("Librarian"))
+                        {
+                            <a href="@Url.Action("CreateBook", "Books")" class="btn btn-outline-dark">Add new Book</a>
+                        }
+                    </div>
+                </div>
+            </div>
+            @if (User.IsInRole("Librarian"))
+            {
+                <div class="col-md-6 col-lg-6">
+                    <div class="card shadow mb-3">
+                        <div class="card-header">Book Transactions</div>
+                        <div class="card-body">
+                            <h5 class="card-title">All Book Transactions</h5>
+                            <p class="card-text">Manage book transactions, such as borrowing and returning books.</p>
+                            <a href="@Url.Action("Index", "BookTransactions")" class="btn btn-outline-dark">View Book Transactions</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col-md-6 col-lg-6">
+                <div class="card shadow mb-3">
+                    <div class="card-header">Authors</div>
+                    <div class="card-body">
+                        <h5 class="card-title">All Authors</h5>
+                        <p class="card-text">Discover and explore the works of various authors.</p>
+                        <a href="@Url.Action("Index", "Authors")" class="btn btn-outline-dark">View All Authors</a>
+                        <a href="@Url.Action("CreateAuthor", "Authors")" class="btn btn-outline-dark">Add new Author</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-6">
+                <div class="card shadow mb-3">
+                    <div class="card-header">Patrons</div>
+                    <div class="card-body">
+                        <h5 class="card-title">All Patrons</h5>
+                        <p class="card-text">Manage library patrons and their activities.</p>
+                        <a href="@Url.Action("Patrons", "Admin")" class="btn btn-outline-dark">View All Patrons</a>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (User.IsInRole("Administrator"))
+        {
+            <div class="col-md-6 col-lg-6">
+                <div class="card shadow mb-3">
+                    <div class="card-header">Librarians</div>
+                    <div class="card-body">
+                        <h5 class="card-title">All Librarians</h5>
+                        <p class="card-text">Manage the librarians who administer the library operations.</p>
+                        <a href="@Url.Action("Librarians", "Admin")" class="btn btn-outline-dark">View All Librarians</a>
+                        <a href="@Url.Action("CreateUser", "Admin")" class="btn btn-outline-dark">Add new Librarian</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-6">
+                <div class="card shadow mb-3">
+                    <div class="card-header">Assign Role</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Assign Role to User</h5>
+                        <p class="card-text">Assign specific roles to users for managing library operations.</p>
+                        <a href="@Url.Action("AssignRole", "Admin")" class="btn btn-outline-dark">Assign Role</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>

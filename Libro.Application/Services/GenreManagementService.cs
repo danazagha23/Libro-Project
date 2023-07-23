@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +19,17 @@ namespace Libro.Application.Services
             _genreRepository = genreRepository;
             _mapper = mapper;
         }
-        public async Task<IEnumerable<BookDTO>> GetBooksByGenreAsync(int genreId)
+        public async Task<ICollection<GenreDTO>> GetAllGenresAsync()
+        {
+            var genres = await _genreRepository.GetAllGenresAsync();
+            var genresDTO = _mapper.Map<ICollection<GenreDTO>>(genres);
+
+            return genresDTO;
+        }
+        public async Task<ICollection<BookDTO>> GetBooksByGenreAsync(int genreId)
         {
             var books = await _genreRepository.GetBooksByGenreAsync(genreId);
-            var booksDTO = _mapper.Map<IEnumerable<BookDTO>>(books);
+            var booksDTO = _mapper.Map<ICollection<BookDTO>>(books);
 
             return booksDTO;
         }

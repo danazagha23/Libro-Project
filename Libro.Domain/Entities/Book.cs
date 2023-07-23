@@ -1,6 +1,7 @@
 ﻿using Libro.Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +15,12 @@ namespace Libro.Domain.Entities
         public string Description { get; set; }
         public DateTime PublicationDate { get; set; }
         public int GenreId { get; set; }
-        public int AuthorId { get; set; }
-        public AvailabilityStatus AvailabilityStatus { get; set; }
+        public AvailabilityStatus AvailabilityStatus { get; set; } = AvailabilityStatus.Available;
 
-        public IEnumerable<Author> Authors { get; set; }
+        public ICollection<BookAuthor> BookAuthors { get; set; }
+        public ICollection<ReadingList> ReadingLists { get; set; }
+        public ICollection<Review> Reviews { get; set; }
         public Genre Genre { get; set; }
+
     }
 }
