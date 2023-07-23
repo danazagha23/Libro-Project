@@ -18,5 +18,9 @@ namespace Libro.Domain.Interfaces
         Task<bool> CreateUserAsync(User user);
         Task<User> UpdateUserAsync(int userId, User user);
         Task<bool> DeleteUserAsync(int userId);
+
+        Task<List<BookTransaction>> GetBorrowingHistoryAsync(int patronId);
+        Task<List<BookTransaction>> GetCurrentLoansAsync(int patronId);
+        Task<List<BookTransaction>> GetOverdueLoansAsync(int patronId);
     }
 }

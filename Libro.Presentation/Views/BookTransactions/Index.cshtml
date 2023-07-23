@@ -1,0 +1,173 @@
+﻿@model BookTransactionsViewModel
+
+@{
+    ViewData["Title"] = "Book Transactions";
+}
+
+<h1>Book Transactions</h1>
+<form asp-controller="BookTransactions" asp-action="Index" method="get">
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="selectedType">Status:</label>
+                <select id="selectedType" name="selectedType" class="form-control">
+                    <option value="" selected>Any</option>
+                    <option value="Reserved">Reserved</option>
+                    <option value="Borrowed">Borrowed</option>
+                    <option value="Returned">Returned</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="selectedPatron">Patron Username:</label>
+                <input type="text" list="patronNames" id="selectedPatron" name="selectedPatron" class="form-control" value="@Model.SelectedPatron" placeholder="Enter patron username" />
+                <datalist id="patronNames">
+                    @foreach (var patron in Model.Patrons.Take(50))
+                    {
+                        <option value="@patron.Username">@patron.Username</option>
+                    }
+                </datalist>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="selectedBook">Title:</label>
+                <input type="text" list="bookTitles" id="selectedBook" name="selectedBook" class="form-control" value="@Model.SelectedBook" placeholder="Enter or select a book title" />
+                <datalist id="bookTitles">
+                    @foreach (var book in Model.Books.Take(50))
+                    {
+                        <option value="@book.Title">@book.Title</option>
+                    }
+                </datalist>
+            </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Patron Username</th>
+                <th>Book Title</th>
+                <th>Status</th>
+                <th>Transaction Date</th>
+                <th>Due Date</th>
+                <th>Elapsed time</th>
+                <th>Overdue Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in Model.FilteredTransactions)
+            {
+                <tr>
+                    <td>@transaction.TransactionId</td>
+                    <td>@transaction.Patron.Username</td>
+                    <td>@transaction.Book.Title</td>
+                    <td>@transaction.TransactionType</td>
+                    <td>@transaction.TransactionDate.ToString("d")</td>
+                    <td>@transaction.DueDate.ToString("d")</td>
+                    <td>
+                        @{
+                            TimeSpan elapsedTime = transaction.DueDate - DateTime.Now;
+                            string elapsedTimeString;
+
+                            if (elapsedTime.TotalDays >= 1)
+                            {
+                                elapsedTimeString = $"{(int)elapsedTime.TotalDays} days";
+                            }
+                            else if (elapsedTime.TotalHours >= 1)
+                            {
+                                elapsedTimeString = $"{(int)elapsedTime.TotalHours} hours";
+                            }
+                            else if (elapsedTime.TotalMinutes >= 1)
+                            {
+                                elapsedTimeString = $"{(int)elapsedTime.TotalMinutes} minutes";
+                            }
+                            else
+                            {
+                                elapsedTimeString = "Less than a minute";
+                            }
+                        }
+                        @elapsedTimeString
+                    </td>
+                    <td>
+                        @{
+                            bool isOverdue = transaction.DueDate < DateTime.Now;
+                            if (isOverdue)
+                            {
+                                <span class="text-danger">Overdue</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">Not Overdue</span>
+                            }
+                        }
+                    </td>
+
+                    <td>
+                        @if (transaction.TransactionType == TransactionType.Reserved && !transaction.IsReturned)
+                        {
+                            <form asp-controller="BookTransactions" asp-action="Checkout" method="post">
+                                <input type="hidden" name="transactionId" value="@transaction.TransactionId" />
+                                <button type="submit" class="btn btn-primary">Check Out</button>
+                            </form>
+                        }
+                        else if (transaction.TransactionType == TransactionType.Borrowed && !transaction.IsReturned)
+                        {
+                            <form asp-controller="BookTransactions" asp-action="AcceptReturn" method="post">
+                                <input type="hidden" name="transactionId" value="@transaction.TransactionId" />
+                                <button type="submit" class="btn btn-primary">Accept Return</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1 , SelectedType = Model.SelectedType, SelectedPatron = Model.SelectedPatron, SelectedBook = Model.SelectedBook})">Previous</a>
+                </li>
+            }
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i , SelectedType = Model.SelectedType, SelectedPatron = Model.SelectedPatron, SelectedBook = Model.SelectedBook})">@i</a>
+
+                </li>
+            }
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1 , SelectedType = Model.SelectedType, SelectedPatron = Model.SelectedPatron, SelectedBook = Model.SelectedBook})">Next</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+
+<script>
+    // Set the selected values after filtration
+    var selectedType = "@Model.SelectedType";
+
+    document.getElementById("selectedType").value = selectedType;
+
+    function clearFilters() {
+        document.getElementById("selectedType").value = "";
+        document.getElementById("selectedPatron").value = "";
+        document.getElementById("selectedBook").value = "";
+    }
+</script>

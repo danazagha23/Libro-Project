@@ -94,7 +94,7 @@ namespace Libro.Presentation.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         principal);
 
-                    return RedirectToAction("Profile", "Account");
+                    return RedirectToAction("Index", "Home");
                 }
                 catch (Exception ex)
                 {
@@ -105,14 +105,25 @@ namespace Libro.Presentation.Controllers
             return View(model);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Patron")]
         [HttpGet]
         public async Task<IActionResult> ProfileAsync()
         {
             // Get the user's unique identifier from the claims
             int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var userDTO = await _userManagementService.GetUserByIdAsync(userId);
-            var userProfile = _mapper.Map<UserProfileViewModel>(userDTO);
+
+            var borrowingHistory = await _userManagementService.GetBorrowingHistoryAsync(userId);
+            var currentLoans = await _userManagementService.GetCurrentLoansAsync(userId);
+            var overdueLoans = await _userManagementService.GetOverdueLoansAsync(userId);
+
+            var userProfile = new UserProfileViewModel
+            {
+                User = userDTO,
+                BorrowingHistory = borrowingHistory,
+                CurrentLoans = currentLoans,
+                OverdueLoans = overdueLoans
+            };
 
             return View(userProfile);
         }

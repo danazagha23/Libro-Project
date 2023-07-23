@@ -35,9 +35,24 @@
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="AssignRole">AssignRole</a>
                                 </li>
                             }
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Profile">Profile</a>
-                            </li>
+                            @if (User.IsInRole("Librarian"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="BookTransactions" asp-action="Index">BookTransactions</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Administrator") || User.IsInRole("Librarian"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Patrons">Patrons</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Patron"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Profile">Profile</a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>

@@ -79,5 +79,33 @@ namespace Libro.Infrastructure.Data.Repositories
             return true;
         }
 
+        public async Task<List<BookTransaction>> GetBorrowingHistoryAsync(int patronId)
+        {
+            return await _context.BookTransactions
+                .Include(b => b.Book)
+                .Include(p => p.Patron)
+                .Where(t => t.PatronId == patronId)
+                .ToListAsync();
+        }
+
+        public async Task<List<BookTransaction>> GetCurrentLoansAsync(int patronId)
+        {
+            return await _context.BookTransactions
+                .Include(b => b.Book)
+                .Include(p => p.Patron)
+                .Where(bt => bt.PatronId == patronId && bt.TransactionType == TransactionType.Borrowed && !bt.IsReturned)
+                .ToListAsync();
+        }
+
+        public async Task<List<BookTransaction>> GetOverdueLoansAsync(int patronId)
+        {
+            DateTime currentDate = DateTime.Now;
+            return await _context.BookTransactions
+                .Include(b => b.Book)
+                .Include(p => p.Patron)
+                .Where(bt => bt.PatronId == patronId && bt.TransactionType == TransactionType.Borrowed && !bt.IsReturned && bt.DueDate < currentDate)
+                .ToListAsync();
+        }
+
     }
 }
