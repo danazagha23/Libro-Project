@@ -1,6 +1,7 @@
 ﻿using Libro.Application.DTOs;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
+using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -11,43 +12,40 @@ namespace Libro.Presentation.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IBookManagementService _bookManagementService;
         private readonly IUserManagementService _userManagementService;
         private readonly INotificationService _notificationService;
 
-        public HomeController(ILogger<HomeController> logger, IBookManagementService bookManagementService, IUserManagementService userManagementService, INotificationService notificationService)
+        public HomeController(INotificationService notificationService, IUserManagementService userManagementService, IBookManagementService bookManagementService)
         {
-            _logger = logger;
-            _bookManagementService = bookManagementService;
             _userManagementService = userManagementService;
+            _bookManagementService = bookManagementService;
             _notificationService = notificationService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> IndexAsync()
         {
             var books = await _bookManagementService.GetAllBooksAsync();
             var availableBooks = books.Where(b => b.AvailabilityStatus == AvailabilityStatus.Available);
-
-            int unreadNotificationCount = 0;
             var notifications = new List<NotificationDTO>();
-            IEnumerable<BookDTO> bookRecommendations = new List<BookDTO>();
+
+            ICollection<BookDTO> bookRecommendations = new List<BookDTO>();
 
             if (User.Identity.IsAuthenticated)
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                unreadNotificationCount = await _notificationService.GetUnreadNotificationCountAsync(unreadNotificationCount);
-                notifications = await _notificationService.GetNotificationsForUserAsync(userId);
                 bookRecommendations = await _userManagementService.GetUserRecommendationsAsync(userId);
+                var _notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+                notifications = _notifications.ToList();
             }
 
             var homeViewModel = new HomeViewModel
             {
                 AvailableBooks = availableBooks,
-                UnreadNotificationCount = unreadNotificationCount,
-                Notifications = notifications,
-                BookRecommendations = bookRecommendations
+                BookRecommendations = bookRecommendations,
+                UnreadNotificationCount = 0,
+                Notifications = notifications
             };
 
             return View(homeViewModel);

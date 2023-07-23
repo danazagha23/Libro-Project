@@ -1,7 +1,8 @@
 ﻿using Libro.Domain.Entities;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,20 +14,44 @@ namespace Libro.Infrastructure.Data.Repositories
     public class GenreRepository : IGenreRepository
     {
         private readonly LibroDbContext _context;
-        public GenreRepository(LibroDbContext context)
+        private readonly ILogger<GenreRepository> _logger;
+
+        public GenreRepository(LibroDbContext context, ILogger<GenreRepository> logger)
         {
             _context = context;
-        }
-        public async Task<IEnumerable<Genre>> GetAllGenresAsync()
-        {
-            return await _context.Genres
-                .Include(genre => genre.Books)
-                .ToListAsync();
-        }
-        public async Task<IEnumerable<Book>> GetBooksByGenreAsync(int genreId)
-        {
-            return await _context.Books.Where(id => id.GenreId == genreId).ToListAsync();
+            _logger = logger;
         }
 
+        public async Task<ICollection<Genre>> GetAllGenresAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching all genres from the database.");
+                return await _context.Genres
+                    .Include(genre => genre.Books)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching all genres.");
+                throw;
+            }
+        }
+
+        public async Task<ICollection<Book>> GetBooksByGenreAsync(int genreId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching books by genre ID: {GenreId} from the database.", genreId);
+                return await _context.Books
+                    .Where(book => book.GenreId == genreId)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching books by genre ID: {GenreId}.", genreId);
+                throw;
+            }
+        }
     }
 }

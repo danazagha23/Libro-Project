@@ -1,18 +1,27 @@
+using AutoMapper;
+using EFCore.NamingConventions.Internal;
+using Libro.Application.DTOs;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
-using Libro.Domain.Interfaces;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Libro.Infrastructure.Data.Repositories;
+using Libro.Presentation.Controllers;
+using Libro.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Scrutor;
+using Serilog;
+using System.Reflection;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,34 +36,32 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API Documentation", Version = "v1" });
 });
 
+var assemblies = new[]
+{
+    Assembly.GetAssembly(typeof(UserManagementService)), // Assembly for UserManagementService
+    Assembly.GetAssembly(typeof(UserRepository)),
+    Assembly.GetAssembly(typeof(HomeController))
+};
 
-builder.Services.AddScoped<IUserManagementService, UserManagementService>();
-builder.Services.AddScoped<IAuthorManagementService, AuthorManagementService>();
-builder.Services.AddScoped<IGenreManagementService, GenreManagementService>();
-builder.Services.AddScoped<IBookManagementService, BookManagementService>();
-builder.Services.AddScoped<IBookTransactionsService, BookTransactionsService>();
-builder.Services.AddScoped<IValidationService, ValidationService>();
-builder.Services.AddScoped<IReadingListService, ReadingListService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
+// Use Scrutor for convention-based registration
+builder.Services.Scan(scan =>
+{
+    scan.FromAssemblies(assemblies)
+        .AddClasses(classes => classes.Where(type =>
+            type.Name.EndsWith("Service") || type.Name.EndsWith("Repository")))
+        .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+        .AsImplementedInterfaces()
+        .WithScopedLifetime();
+});
 
-builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IBookTransactionsRepository, BookTransactionsRepository>();
-builder.Services.AddScoped<IGenreRepository, GenreRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IReadingListRepository, ReadingListRepository>();
-builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
-builder.Services.AddAutoMapper(typeof(Libro.Application.Mappings.MappingProfiles));
-builder.Services.AddAutoMapper(typeof(Libro.Presentation.Mappings.MappingProfiles));
+builder.Services.AddAutoMapper(assemblies);
 
 // Build the IConfiguration instance
 var configuration = new ConfigurationBuilder()
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .Build();
+
 
 // Add the IConfiguration instance to the services collection
 builder.Services.AddSingleton<IConfiguration>(configuration);
@@ -66,14 +73,46 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.Secure = CookieSecurePolicy.Always; // Set secure policy
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.AddSerilog(Log.Logger);
+});
+
+var jwtSettings = configuration.GetSection("JwtSettings");
+var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.Cookie.HttpOnly = true; // Set HttpOnly flag
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = secretKey
+    };
+});
 
 builder.Services.AddAuthorization();
+
+builder.Services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
+
+// Add the OverdueBookCheckService as a singleton service
+builder.Services.AddSingleton<IHostedService, OverdueBookCheckService>();
 
 var app = builder.Build();
 
@@ -96,14 +135,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseMiddleware<AccessTokenMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 });
 
 app.Run();

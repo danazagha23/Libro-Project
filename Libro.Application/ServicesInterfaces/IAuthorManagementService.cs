@@ -9,7 +9,7 @@ namespace Libro.Application.ServicesInterfaces
 {
     public interface IAuthorManagementService
     {
-        Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync();
+        Task<ICollection<AuthorDTO>> GetAllAuthorsAsync();
         Task<AuthorDTO> GetAuthorByIdAsync(int authorId);
         Task<AuthorDTO> GetAuthorByNameAsync(string authorName);
         Task<AuthorDTO> CreateAuthorAsync(AuthorDTO authorDTO);

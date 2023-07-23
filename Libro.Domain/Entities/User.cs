@@ -19,8 +19,9 @@ namespace Libro.Domain.Entities
         public string? Address { get; set; }
         public UserRole Role { get; set; }
 
-        public IEnumerable<ReadingList> ReadingLists { get; set; }
-        public IEnumerable<Review> Notifications { get; set; }
-        public IEnumerable<BookTransaction>? Transactions { get; set; }
+        public ICollection<ReadingList> ReadingLists { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
+        public ICollection<Review> Reviews { get; set; }
+        public ICollection<BookTransaction>? Transactions { get; set; }
     }
 }

@@ -43,7 +43,6 @@ namespace Libro.Tests.Controllers
                 Role = UserRole.Librarian
             };
 
-            // Configure the UserManagementService mock to return a successful role assignment
             _userManagementServiceMock
                 .Setup(x => x.AssignRoleAsync(It.IsAny<string>(), It.IsAny<UserRole>()))
                 .ReturnsAsync(true);
@@ -76,36 +75,72 @@ namespace Libro.Tests.Controllers
             // Arrange
             var users = new List<UserDTO>
             {
-                new UserDTO { Role = UserRole.Patron },
-                new UserDTO { Role = UserRole.Patron }
+                new UserDTO { UserId = 1, Username = "user1", Role = UserRole.Patron },
+                new UserDTO { UserId = 2, Username = "user2", Role = UserRole.Patron }
+            };
+            var filteredUsers = new List<UserDTO>
+            {
+                new UserDTO { UserId = 2, Username = "user2", Role = UserRole.Patron }
             };
 
             _userManagementServiceMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(users);
 
             // Act
-            var result = await _controller.Patrons(null, 1, 5) as ViewResult;
+            var result = await _controller.Patrons("user2", 1, 5) as ViewResult;
 
             // Assert
             Assert.NotNull(result);
             var model = Assert.IsType<UsersViewModel>(result.Model);
 
             Assert.Equal(users, model.Users);
-            Assert.Equal(users, model.FilteredUsers);
-            Assert.Null(model.SelectedUser);
+            Assert.Equal(filteredUsers.First().UserId, 2);
+            Assert.Equal(filteredUsers.Count(), 1);
             Assert.Equal(1, model.PageNumber);
             Assert.Equal(1, model.TotalPages);
         }
 
         [Fact]
-        public async Task EditUser_ValidModel_RedirectToAction()
+        public async Task EditUser_ValidModel_UpdateUsername()
         {
             // Arrange
-            var userDTO = new UserDTO { UserId = 1 };
-            var editUserViewModel = new EditUserViewModel { UserId = 1 };
+            var userDTO = new UserDTO 
+            { 
+                UserId = 1,
+                Username = "user1",
+                FirstName = "user",
+                LastName = "1",
+                Password = "12345678",
+                Email = "user@gmail.com",
+                Address = "Nablus",
+                 PhoneNumber = "0595409501",
+                Role = UserRole.Patron      
+            };
+            var editUserViewModel = new EditUserViewModel
+            {
+                UserId = 1,
+                Username = "updated",
+                FirstName = "user",
+                LastName = "1",
+                Email = "user@gmail.com",
+                Address = "Nablus",
+                PhoneNumber = "0595409501"
+            };
+            var UpdatedUserDTO = new UserDTO
+            {
+                UserId = 1,
+                Username = "updated",
+                FirstName = "user",
+                LastName = "1",
+                Password = "12345678",
+                Email = "user@gmail.com",
+                Address = "Nablus",
+                PhoneNumber = "0595409501",
+                Role = UserRole.Patron
+            };
 
-            _mapperMock.Setup(x => x.Map<UserDTO>(It.IsAny<EditUserViewModel>())).Returns(new UserDTO());
+            _mapperMock.Setup(x => x.Map<UserDTO>(It.IsAny<EditUserViewModel>())).Returns(userDTO);
             _userManagementServiceMock.Setup(x => x.GetUserByIdAsync(1)).ReturnsAsync(userDTO);
-            _userManagementServiceMock.Setup(x => x.UpdateUserAsync(1, It.IsAny<UserDTO>())).ReturnsAsync(new UserDTO());
+            _userManagementServiceMock.Setup(x => x.UpdateUserAsync(1, userDTO)).ReturnsAsync(UpdatedUserDTO);
 
             // Act
             var result = await _controller.EditUser(editUserViewModel) as RedirectToActionResult;
@@ -119,8 +154,24 @@ namespace Libro.Tests.Controllers
         public async Task EditUser_InvalidModel_ReturnsView()
         {
             // Arrange
+            var userDTO = new UserDTO
+            {
+                UserId = 1,
+                Username = "user1",
+                FirstName = "user",
+                LastName = "1",
+                Password = "12345678",
+                Email = "user@gmail.com",
+                Address = "Nablus",
+                PhoneNumber = "0595409501",
+                Role = UserRole.Patron
+            };
             var editUserViewModel = new EditUserViewModel();
-            _mapperMock.Setup(x => x.Map<UserDTO>(It.IsAny<RegisterViewModel>())).Returns(new UserDTO());
+            var UpdatedUserDTO = new UserDTO();
+
+            _mapperMock.Setup(x => x.Map<UserDTO>(It.IsAny<EditUserViewModel>())).Returns(userDTO);
+            _userManagementServiceMock.Setup(x => x.GetUserByIdAsync(1)).ReturnsAsync(userDTO);
+            _userManagementServiceMock.Setup(x => x.UpdateUserAsync(1, userDTO)).ReturnsAsync(UpdatedUserDTO);
 
             // Act
             var result = await _controller.EditUser(editUserViewModel) as ViewResult;

@@ -13,18 +13,22 @@ namespace Libro.Application.Services
 {
     public class NotificationService : INotificationService
     {
+        private readonly IEmailService _emailService;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public NotificationService(INotificationRepository notificationRepository, IMapper mapper)
+        public NotificationService(IUserRepository userRepository, IEmailService emailService, INotificationRepository notificationRepository, IMapper mapper)
         {
+            _emailService = emailService;
+            _userRepository = userRepository;
             _notificationRepository = notificationRepository;
             _mapper = mapper;
         }
 
-        public async Task<List<NotificationDTO>> GetNotificationsForUserAsync(int userId)
+        public async Task<ICollection<NotificationDTO>> GetNotificationsForUserAsync(int userId)
         {
-            return _mapper.Map<List<NotificationDTO>>(await _notificationRepository.GetNotificationsForUserAsync(userId));
+            return _mapper.Map<ICollection<NotificationDTO>>(await _notificationRepository.GetNotificationsForUserAsync(userId));
         }
 
         public async Task<int> GetUnreadNotificationCountAsync(int userId)
@@ -39,9 +43,11 @@ namespace Libro.Application.Services
                 UserId = userId,
                 Message = message,
                 IsRead = false,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                User = await _userRepository.GetUserByIdAsync(userId)
             };
-
+            // Send email notification
+            await _emailService.SendEmail(notification.User.Email, "Libro Notification", notification.Message);
             await _notificationRepository.CreateNotificationAsync(notification);
         }
 

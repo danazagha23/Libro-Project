@@ -95,7 +95,7 @@
                             }
                             else
                             {
-                                elapsedTimeString = "Less than a minute";
+                                elapsedTimeString = "0";
                             }
                         }
                         @elapsedTimeString
@@ -105,7 +105,14 @@
                             bool isOverdue = transaction.DueDate < DateTime.Now;
                             if (isOverdue)
                             {
-                                <span class="text-danger">Overdue</span>
+                                if(transaction.IsReturned)
+                                {
+                                    <span class="text-danger">Book is returned</span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">Overdue</span>
+                                }
                             }
                             else
                             {
@@ -122,11 +129,19 @@
                                 <button type="submit" class="btn btn-primary">Check Out</button>
                             </form>
                         }
-                        else if (transaction.TransactionType == TransactionType.Borrowed && !transaction.IsReturned)
+                        @if (transaction.TransactionType == TransactionType.Borrowed && !transaction.IsReturned && (int)elapsedTime.TotalDays > 0)
                         {
                             <form asp-controller="BookTransactions" asp-action="AcceptReturn" method="post">
                                 <input type="hidden" name="transactionId" value="@transaction.TransactionId" />
                                 <button type="submit" class="btn btn-primary">Accept Return</button>
+                            </form>
+                        }
+                        @if (transaction.TransactionType == TransactionType.Borrowed && !transaction.IsReturned && (int)elapsedTime.TotalDays < 3)
+                        {
+                            <form method="post" asp-controller="Librarian" asp-action="SendDueDateNotification">
+                                <input type="hidden" name="username" value="@transaction.Patron.Username" />
+                                <input type="hidden" name="dueDate" value="@transaction.DueDate" />
+                                <button type="submit" class="btn btn-primary">Send Due Date Notification</button>
                             </form>
                         }
                     </td>

@@ -11,7 +11,7 @@ namespace Libro.Application.ServicesInterfaces
 {
     public interface IReviewService
     {
-        Task<IEnumerable<ReviewDTO>> GetReviewsByBookIdAsync(int bookId);
+        Task<ICollection<ReviewDTO>> GetReviewsByBookIdAsync(int bookId);
         Task<double> GetAverageRatingForBookAsync(int bookId);
         Task CreateReviewAsync(ReviewDTO reviewDTO);
     }

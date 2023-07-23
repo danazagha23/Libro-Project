@@ -10,12 +10,12 @@ namespace Libro.Domain.RepositoriesInterfaces
     public interface IBookTransactionsRepository
     {
         Task<bool> CreateTransactionAsync(BookTransaction transaction);
-        Task<List<BookTransaction>> GetAllBookTransactionsAsync();
+        Task<ICollection<BookTransaction>> GetAllBookTransactionsAsync();
         Task<BookTransaction> GetTransactionByIdAsync(int transactionId);
-        Task<List<BookTransaction>> GetTransactionsByUserIdAsync(int userId);
-        Task<List<BookTransaction>> GetTransactionsByBookIdAsync(int bookId);
+        Task<ICollection<BookTransaction>> GetTransactionsByUserIdAsync(int userId);
+        Task<ICollection<BookTransaction>> GetTransactionsByBookIdAsync(int bookId);
         Task<BookTransaction> UpdateTransactionAsync(int transactionId, BookTransaction transaction);
         Task<bool> DeleteTransactionAsync(int transactionId);
-        Task<List<BookTransaction>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook, string Status);
+        Task<ICollection<BookTransaction>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook);
     }
 }

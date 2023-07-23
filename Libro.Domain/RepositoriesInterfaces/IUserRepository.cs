@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Libro.Domain.Interfaces
+namespace Libro.Domain.RepositoriesInterfaces
 {
     public interface IUserRepository
     {
-        Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role);
+        Task<ICollection<User>> GetAllUsersAsync();
+        Task<ICollection<User>> GetUsersByRoleAsync(UserRole role);
         Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByIdAsync(int userId);
 
@@ -19,9 +19,9 @@ namespace Libro.Domain.Interfaces
         Task<User> UpdateUserAsync(int userId, User user);
         Task<bool> DeleteUserAsync(int userId);
 
-        Task<List<BookTransaction>> GetBorrowingHistoryAsync(int patronId);
-        Task<List<BookTransaction>> GetCurrentLoansAsync(int patronId);
-        Task<List<BookTransaction>> GetOverdueLoansAsync(int patronId);
+        Task<ICollection<BookTransaction>> GetBorrowingHistoryAsync(int patronId);
+        Task<ICollection<BookTransaction>> GetCurrentLoansAsync(int patronId);
+        Task<ICollection<BookTransaction>> GetOverdueLoansAsync(int patronId);
 
     }
 }

@@ -9,7 +9,7 @@ namespace Libro.Domain.RepositoriesInterfaces
 {
     public interface IReviewRepository
     {
-        Task<IEnumerable<Review>> GetReviewsByBookIdAsync(int bookId);
+        Task<ICollection<Review>> GetReviewsByBookIdAsync(int bookId);
         Task<double> GetAverageRatingForBookAsync(int bookId);
         Task CreateReviewAsync(Review review);
     }

@@ -22,10 +22,10 @@ namespace Libro.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ReviewDTO>> GetReviewsByBookIdAsync(int bookId)
+        public async Task<ICollection<ReviewDTO>> GetReviewsByBookIdAsync(int bookId)
         {
             var reviews = await _reviewRepository.GetReviewsByBookIdAsync(bookId);
-            return _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
+            return _mapper.Map<ICollection<ReviewDTO>>(reviews);
         }
 
         public async Task<double> GetAverageRatingForBookAsync(int bookId)

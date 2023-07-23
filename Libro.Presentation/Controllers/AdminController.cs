@@ -103,7 +103,6 @@ namespace Libro.Presentation.Controllers
                 updatedUser.Password = user.Password;
                 updatedUser.Role = user.Role;
 
-                // Skip username validation if it remains unchanged
                 if (userDetailsModel.Username == user.Username)
                 {
                     updatedUser.Username = user.Username;

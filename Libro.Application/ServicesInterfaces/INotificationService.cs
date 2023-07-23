@@ -10,7 +10,7 @@ namespace Libro.Application.ServicesInterfaces
 {
     public interface INotificationService
     {
-        Task<List<NotificationDTO>> GetNotificationsForUserAsync(int userId);
+        Task<ICollection<NotificationDTO>> GetNotificationsForUserAsync(int userId);
         Task<int> GetUnreadNotificationCountAsync(int userId);
         Task CreateNotificationAsync(int userId, string message);
         Task MarkNotificationAsReadAsync(int notificationId);

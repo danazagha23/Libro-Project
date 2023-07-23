@@ -217,29 +217,51 @@ namespace Libro.Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBook(CreateBookViewModel bookViewModel)
         {
-            var genres = await _genreManagementService.GetAllGenresAsync();
-            bookViewModel.Genres = genres.ToList();
-            var selectedGenre = bookViewModel.Genres.FirstOrDefault(genre => genre.Name == bookViewModel.SelectedGenre);
-
-            var book = new BookDTO
+            try
             {
-                Title = bookViewModel.Title,
-                Description = bookViewModel.Description,
-                PublicationDate = bookViewModel.PublicationDate,
-                AvailabilityStatus = bookViewModel.AvailabilityStatus,
-                GenreId = selectedGenre.GenreId
-            };
+                var genres = await _genreManagementService.GetAllGenresAsync();
+                bookViewModel.Genres = genres.ToList();
+                var selectedGenre = bookViewModel.Genres.FirstOrDefault(genre => genre.Name == bookViewModel.SelectedGenre);
 
-            var createdBook = await _bookManagementService.CreateBookAsync(book);
-            createdBook = await _bookManagementService.GetBookByIdAsync(createdBook.BookId);
+                var book = new BookDTO
+                {
+                    Title = bookViewModel.Title,
+                    Description = bookViewModel.Description,
+                    PublicationDate = bookViewModel.PublicationDate,
+                    AvailabilityStatus = bookViewModel.AvailabilityStatus,
+                    GenreId = selectedGenre?.GenreId ?? 0
+                };
 
-            foreach (var authorName in bookViewModel.SelectedAuthors)
-            {
-                var author = await _authorManagementService.GetAuthorByNameAsync(authorName);
-                await _bookManagementService.CreateBookAuthorAsync(createdBook.BookId, author.AuthorId);
+                var createdBook = await _bookManagementService.CreateBookAsync(book);
+                if (createdBook == null)
+                {
+                    throw new Exception("Failed to create the book.");
+                }
+
+                createdBook = await _bookManagementService.GetBookByIdAsync(createdBook.BookId);
+                if (createdBook == null)
+                {
+                    throw new Exception("Failed to retrieve the created book.");
+                }
+
+                foreach (var authorName in bookViewModel.SelectedAuthors)
+                {
+                    var author = await _authorManagementService.GetAuthorByNameAsync(authorName);
+                    if (author != null)
+                    {
+                        await _bookManagementService.CreateBookAuthorAsync(createdBook.BookId, author.AuthorId);
+                    }
+                }
+
+                return RedirectToAction("Search");
             }
-            return Redirect("Search");
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(bookViewModel);
+            }
         }
+
 
         [HttpPost]
         [Authorize(Roles = "Patron")]
@@ -253,7 +275,7 @@ namespace Libro.Presentation.Controllers
             if (readingList == null)
             {
                 var newReadingList = await _readingListService.CreateReadingListAsync(userId);
-                readingLists.ToList().Add(newReadingList);
+                readingLists.Add(newReadingList);
                 readingList = newReadingList;
             }
 
@@ -262,11 +284,11 @@ namespace Libro.Presentation.Controllers
             if (!isBookInReadingList)
             {
                 await _readingListService.AddBookToReadingListAsync(readingList.Id, id);
-                TempData["SuccessMessage"] = "Book added to reading list.";
             }
 
             return RedirectToAction("BookDetails", "Books", new { id = id });
         }
+
 
         [HttpPost]
         [Authorize(Roles = "Patron")]
@@ -278,20 +300,8 @@ namespace Libro.Presentation.Controllers
             var readingList = readingLists.FirstOrDefault();
 
             await _readingListService.RemoveBookFromReadingListAsync(readingList.Id, id);
-            TempData["SuccessMessage"] = "Book removed from reading list.";
 
-            var returnUrl = "";
-
-            if (Request.Headers["Referer"].ToString()?.Contains("/Books/BookDetails") == true)
-            {
-                returnUrl = Url.Action("BookDetails", "Books", new { id = id });
-            }
-            else
-            {
-                returnUrl = Url.Action("Profile", "Account");
-            }
-
-            return Redirect(returnUrl);
+            return RedirectToAction("BookDetails", "Books", new { id = id });
         }
 
         [HttpPost]

@@ -1,5 +1,5 @@
 ﻿using Libro.Application.ServicesInterfaces;
-using Libro.Domain.Interfaces;
+using Libro.Domain.RepositoriesInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

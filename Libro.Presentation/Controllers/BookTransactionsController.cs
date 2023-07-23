@@ -13,12 +13,14 @@ namespace Libro.Presentation.Controllers
         private readonly IBookTransactionsService _bookTransactionsService;
         private readonly IBookManagementService _bookManagementService;
         private readonly IUserManagementService _userManagementService;
+        private readonly INotificationService _notificationService;
 
-        public BookTransactionsController(IBookTransactionsService bookTransactionsService,IBookManagementService bookManagementService ,IUserManagementService userManagementService)
+        public BookTransactionsController(IBookTransactionsService bookTransactionsService,IBookManagementService bookManagementService ,IUserManagementService userManagementService, INotificationService notificationService)
         {
             _bookTransactionsService = bookTransactionsService;
             _bookManagementService = bookManagementService;
             _userManagementService = userManagementService;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -49,10 +51,10 @@ namespace Libro.Presentation.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Librarian")]
-        public async Task<IActionResult> Index(string selectedType, string selectedPatron, string selectedBook, string status, int page = 1, int pageSize = 5)
+        public async Task<IActionResult> Index(string selectedType, string selectedPatron, string selectedBook, int page = 1, int pageSize = 5)
         {
             var bookTransactions = await _bookTransactionsService.GetAllBookTransactionsAsync();
-            var searchResults = await _bookTransactionsService.FindTransactionsAsync(selectedType, selectedPatron, selectedBook, status);
+            var searchResults = await _bookTransactionsService.FindTransactionsAsync(selectedType, selectedPatron, selectedBook);
             var users = await _userManagementService.GetAllUsersAsync();
             var patrons = users.ToList().Where(user => user.Role == UserRole.Patron);
 

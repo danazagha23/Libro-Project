@@ -11,15 +11,11 @@ namespace Libro.Application.ServicesInterfaces
     public interface IBookTransactionsService
     {
         Task<bool> CreateTransactionAsync(BookTransactionDTO transactionDTO);
-        Task<List<BookTransactionDTO>> GetAllBookTransactionsAsync();
-        Task<BookTransactionDTO> GetTransactionByIdAsync(int transactionId);
-        Task<List<BookTransactionDTO>> GetTransactionsByUserIdAsync(int userId);
-        Task<List<BookTransactionDTO>> GetTransactionsByBookIdAsync(int bookId);
-        Task<BookTransactionDTO> UpdateTransactionAsync(int transactionId, BookTransactionDTO transactionDTO);
         Task<bool> DeleteTransactionAsync(int transactionId);
+        Task<ICollection<BookTransactionDTO>> GetAllBookTransactionsAsync();
         Task ReserveBookAsync(int bookId, int patronId);
         Task CheckOutBookAsync(int transactionId);
         Task AcceptReturnAsync(int transactionId);
-        Task<List<BookTransactionDTO>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook, string Status);
+        Task<ICollection<BookTransactionDTO>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook);
     }
 }
