@@ -31,6 +31,16 @@ namespace Libro.Infrastructure.Data.Repositories
                 throw new Exception("Author not Found");
             }
             return author;
+        }       
+        
+        public async Task<Author> GetAuthorByNameAsync(string authorName)
+        {
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.AuthorName == authorName);
+            if (author == null)
+            {
+                throw new Exception("Author not Found");
+            }
+            return author;
         }
 
         public async Task<bool> CreateAuthorAsync(Author author)

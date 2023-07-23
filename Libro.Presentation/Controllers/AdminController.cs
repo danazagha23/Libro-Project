@@ -62,11 +62,11 @@ namespace Libro.Presentation.Controllers
             var pagedAllPatrons = patronsDTOs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var pagedFilteredPatrons = filteredPatrons.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            var patronsViewModel = new PatronsViewModel
+            var patronsViewModel = new UsersViewModel
             {
-                Patrons = pagedAllPatrons.ToList(),
-                FilteredPatrons = pagedFilteredPatrons.ToList(),
-                SelectedPatron = selectedPatron,
+                Users = pagedAllPatrons.ToList(),
+                FilteredUsers = pagedFilteredPatrons.ToList(),
+                SelectedUser = selectedPatron,
 
                 PageNumber = page,
                 TotalPages = (int)Math.Ceiling((double)filteredPatrons.Count() / pageSize)
@@ -115,13 +115,75 @@ namespace Libro.Presentation.Controllers
 
                 await _userManagementService.UpdateUserAsync(updatedUser.UserId, updatedUser);
 
-                return RedirectToAction("Patrons");
+                return RedirectToAction(updatedUser.Role.ToString()+"s");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
                 return View(userDetailsModel);
             }
-    }
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpGet]
+        public async Task<IActionResult> Librarians(string selectedLibrarian, int page = 1, int pageSize = 5)
+        {
+            var users = await _userManagementService.GetAllUsersAsync();
+            var librariansDTOs = users.Where(p => p.Role.ToString() == "Librarian");
+
+            IEnumerable<UserDTO> filteredLibrarians;
+            if (!string.IsNullOrEmpty(selectedLibrarian))
+            {
+                filteredLibrarians = librariansDTOs.Where(p => p.Username.Contains(selectedLibrarian));
+            }
+            else
+            {
+                filteredLibrarians = librariansDTOs;
+            }
+
+            var pagedAllLibrarians = librariansDTOs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedFilteredLibrarians = filteredLibrarians.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var librariansViewModel = new UsersViewModel
+            {
+                Users = pagedAllLibrarians.ToList(),
+                FilteredUsers = pagedFilteredLibrarians.ToList(),
+                SelectedUser = selectedLibrarian,
+
+                PageNumber = page,
+                TotalPages = (int)Math.Ceiling((double)filteredLibrarians.Count() / pageSize)
+            };
+
+            return View(librariansViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult CreateUser()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var userDTO = _mapper.Map<UserDTO>(model);
+                    userDTO.Role = UserRole.Librarian;
+
+                    await _userManagementService.CreateUserAsync(userDTO);
+
+                    return RedirectToAction("Librarians");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                    return View(model);
+                }
+            }
+            return View(model);
+        }
     }
 }

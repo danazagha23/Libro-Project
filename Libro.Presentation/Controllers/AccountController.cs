@@ -37,14 +37,11 @@ namespace Libro.Presentation.Controllers
             {
                 try
                 {
-                    // Map the RegisterViewModel to UserDTO 
                     var userDTO = _mapper.Map<UserDTO>(model);
                     userDTO.Role = UserRole.Patron;
 
-                    // Register the user
                     await _userManagementService.CreateUserAsync(userDTO);
 
-                    // Optionally, you can redirect to a login page or another action
                     return RedirectToAction("Login");
                 }
                 catch (Exception ex)

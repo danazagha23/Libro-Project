@@ -44,7 +44,13 @@ namespace Libro.Application.Services
 
             return _mapper.Map<BookDTO>(book);
         }
-        public async Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO)
+        public async Task<BookAuthorDTO> CreateBookAuthorAsync(int bookId, int authorId)
+        {
+            var bookAuthor = await _bookRepository.CreateBookAuthorAsync(bookId, authorId);
+
+            return _mapper.Map<BookAuthorDTO>(bookAuthor);
+        }
+            public async Task<BookDTO> UpdateBookAsync(int bookId, BookDTO bookDTO)
         {
             var book = _mapper.Map<Book>(bookDTO);
             await _bookRepository.UpdateBookAsync(bookId, book);
@@ -54,6 +60,10 @@ namespace Libro.Application.Services
         public async Task<bool> DeleteBookAsync(int bookId)
         {
             return await _bookRepository.DeleteBookAsync(bookId);
+        }
+        public async Task<bool> DeleteBookAuthorsByBookIdAsync(int bookId)
+        {
+            return await _bookRepository.DeleteBookAuthorsByBookIdAsync(bookId);
         }
 
         public async Task<List<BookDTO>> FindBooksAsync(string bookGenre, string searchString, string authorName, string availabilityStatus)

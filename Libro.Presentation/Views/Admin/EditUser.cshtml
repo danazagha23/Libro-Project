@@ -4,7 +4,7 @@
     ViewData["Title"] = "EditUser";
 }
 
-<h2>Edit Patron Details</h2>
+<h2>Edit @Model.Role.ToString() Details</h2>
 
 <form asp-action="EditUser" method="post">
     <input type="hidden" asp-for="UserId" />
