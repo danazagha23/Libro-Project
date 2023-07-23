@@ -8,16 +8,19 @@ using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Libro.Infrastructure.Data.Repositories;
 using Libro.Presentation.Controllers;
+using Libro.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scrutor;
 using Serilog;
 using System.Reflection;
+using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -82,12 +85,26 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddSerilog(Log.Logger);
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+var jwtSettings = configuration.GetSection("JwtSettings");
+var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.Cookie.HttpOnly = true; // Set HttpOnly flag
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = secretKey
+    };
+});
 
 builder.Services.AddAuthorization();
 
@@ -118,6 +135,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseMiddleware<AccessTokenMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

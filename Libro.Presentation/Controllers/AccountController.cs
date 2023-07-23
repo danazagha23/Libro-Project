@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace Libro.Presentation.Controllers
 {
@@ -18,18 +21,21 @@ namespace Libro.Presentation.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly IReadingListService _readingListRepository;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
         private readonly Application.ServicesInterfaces.IAuthenticationService _authenticationService;
 
         public AccountController(
             IUserManagementService userManagementService,
             IReadingListService readingListService,
             IMapper mapper,
-            Application.ServicesInterfaces.IAuthenticationService authenticationService)
+            Application.ServicesInterfaces.IAuthenticationService authenticationService,
+            IConfiguration configuration)
         {
             _userManagementService = userManagementService;
             _readingListRepository = readingListService;
             _mapper = mapper;
             _authenticationService = authenticationService;
+            _configuration = configuration;
         }
 
 
@@ -84,21 +90,23 @@ namespace Libro.Presentation.Controllers
                         return View(model);
                     }
 
-                    var claims = new List<Claim>
+                    var secretKey = _configuration["JwtSettings:SecretKey"];
+                    var issuer = _configuration["JwtSettings:Issuer"];
+                    var audience = _configuration["JwtSettings:Audience"];
+
+                    // Generate JWT token
+                    var token = GenerateJwtToken(userDTO.UserId.ToString(), userDTO.Username, userDTO.Role.ToString(),
+                        secretKey, issuer, audience);
+
+                    // Create a cookie with the token
+                    Response.Cookies.Append("accessToken", token, new CookieOptions
                     {
-                        new Claim(ClaimTypes.NameIdentifier, userDTO.UserId.ToString()),
-                        new Claim(ClaimTypes.Name, userDTO.Username),
-                        new Claim(ClaimTypes.Role, userDTO.Role.ToString())
-                    };
+                        HttpOnly = true, // HttpOnly cookie for security
+                        Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration time
+                    });
 
-                    var identity = new ClaimsIdentity(claims,
-                        CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    var principal = new ClaimsPrincipal(identity);
-
-                    await _authenticationService.SignInAsync(HttpContext, CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                    return RedirectToAction("Index", "Home");
+                    // Return the JWT token as a response
+                    return RedirectToAction("Index", "Home"); ;
                 }
                 catch (Exception ex)
                 {
@@ -106,7 +114,32 @@ namespace Libro.Presentation.Controllers
                     return View(model);
                 }
             }
+
             return View(model);
+        }
+
+        public string GenerateJwtToken(string userId, string username, string role, string secretKey, string issuer, string audience)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, role)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1), // Token expiration time
+                signingCredentials: credentials
+            );
+
+            return tokenHandler.WriteToken(token);
         }
 
         [Authorize(Roles = "Patron")]
@@ -136,8 +169,14 @@ namespace Libro.Presentation.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
+            Response.Cookies.Append("accessToken", "", new CookieOptions
+            {
+                HttpOnly = true,
+                // Set the same Site and Path as you used when creating the cookie
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(-1) // Set the expiration to a past date
+            }); 
+
             return RedirectToAction("Index", "Home");
         }
     }
