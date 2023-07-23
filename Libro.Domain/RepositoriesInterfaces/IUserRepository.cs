@@ -1,4 +1,5 @@
 ﻿using Libro.Domain.Entities;
+using Libro.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,12 @@ namespace Libro.Domain.Interfaces
     public interface IUserRepository
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
+        Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role);
         Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByIdAsync(int userId);
 
-        Task<User> CreateUserAsync(User userDto);
-        Task<User> UpdateUserAsync(int userId, User userDto);
+        Task<bool> CreateUserAsync(User user);
+        Task<User> UpdateUserAsync(int userId, User user);
         Task<bool> DeleteUserAsync(int userId);
     }
 }

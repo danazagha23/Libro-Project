@@ -20,6 +20,7 @@ namespace Libro.Application.Services
             _bookRepository = bookRepository;
             _mapper = mapper;
         }
+
         public async Task<IEnumerable<BookDTO>> GetAllBooksAsync()
         {
             var books = await _bookRepository.GetAllBooksAsync();

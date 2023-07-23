@@ -12,12 +12,14 @@ namespace Libro.Application.ServicesInterfaces
     public interface IUserManagementService
     {
         Task<IEnumerable<UserDTO>> GetAllUsersAsync();
-        Task<IEnumerable<UserDTO>> GetUsersByRoleAsync(string role);
+        Task<IEnumerable<UserDTO>> GetUsersByRoleAsync(UserRole role);
         Task<UserDTO> GetUserByUsernameAsync(string username);
         Task<UserDTO> GetUserByIdAsync(int userId);
 
         Task<UserDTO> CreateUserAsync(UserDTO userDto);
         Task<UserDTO> UpdateUserAsync(int userId, UserDTO userDto);
         Task<bool> DeleteUserAsync(int userId);
+        Task<UserDTO> AuthenticateUserAsync(string username, string password);
+        Task<bool> AssignRoleAsync(string username, UserRole userRole);
     }
 }

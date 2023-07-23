@@ -11,7 +11,7 @@ namespace Libro.Application.ServicesInterfaces
     {
         Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync();
         Task<AuthorDTO> GetAuthorByIdAsync(int authorId);
-        Task<AuthorDTO> CreateAuthorAsync(AuthorDTO author);
+        Task<AuthorDTO> CreateAuthorAsync(AuthorDTO authorDTO);
         Task<AuthorDTO> UpdateAuthorAsync(int authorId, AuthorDTO authorDTO);
         Task<bool> DeleteAuthorAsync(int authorId);
     }
