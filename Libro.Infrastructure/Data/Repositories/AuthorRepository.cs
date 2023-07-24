@@ -77,14 +77,14 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<bool> CreateAuthorAsync(Author author)
+        public async Task<Author> CreateAuthorAsync(Author author)
         {
             try
             {
                 _context.Authors.Add(author);
                 await _context.SaveChangesAsync();
 
-                return true;
+                return author;
             }
             catch (Exception ex)
             {

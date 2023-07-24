@@ -9,7 +9,7 @@ namespace Libro.Domain.RepositoriesInterfaces
 {
     public interface IBookTransactionsRepository
     {
-        Task<bool> CreateTransactionAsync(BookTransaction transaction);
+        Task<BookTransaction> CreateTransactionAsync(BookTransaction transaction);
         Task<ICollection<BookTransaction>> GetAllBookTransactionsAsync();
         Task<BookTransaction> GetTransactionByIdAsync(int transactionId);
         Task<ICollection<BookTransaction>> GetTransactionsByUserIdAsync(int userId);

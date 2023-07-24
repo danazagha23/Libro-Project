@@ -7,6 +7,7 @@ using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Security.Claims;
 
@@ -17,6 +18,7 @@ namespace Libro.Tests.Controllers
         private readonly Mock<IUserManagementService> _userManagementServiceMock;
         private readonly Mock<IReadingListService> _readingListServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IConfiguration> _configurationMock;
         private readonly Mock<Application.ServicesInterfaces.IAuthenticationService> _authenticationServiceMock;
         private readonly AccountController _accountController;
 
@@ -26,11 +28,13 @@ namespace Libro.Tests.Controllers
             _readingListServiceMock = new Mock<IReadingListService>();
             _authenticationServiceMock = new Mock<Application.ServicesInterfaces.IAuthenticationService>();
             _mapperMock = new Mock<IMapper>();
+            _configurationMock = new Mock<IConfiguration>();
             _accountController = new AccountController(
                 _userManagementServiceMock.Object,
                 _readingListServiceMock.Object,
                 _mapperMock.Object,
-                _authenticationServiceMock.Object
+                _authenticationServiceMock.Object,
+                _configurationMock.Object
             );
         }
 
@@ -132,17 +136,20 @@ namespace Libro.Tests.Controllers
             {
                 UserId = 1,
                 Username = "user1",
-                Password = "12345678",
-                Email = "user@gmail.com",
-                FirstName = "user",
-                LastName = "user",
-                PhoneNumber = "0595409501",
-                Address = "nablus",
                 Role = UserRole.Patron
             };
 
             _userManagementServiceMock.Setup(u => u.AuthenticateUserAsync(loginViewModel.Username, loginViewModel.Password)).ReturnsAsync(userDTO);
-            _authenticationServiceMock.Setup(a => a.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>())).Returns(Task.CompletedTask);
+            _configurationMock.Setup(c => c["JwtSettings:SecretKey"]).Returns("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+            _configurationMock.Setup(c => c["JwtSettings:Issuer"]).Returns("http://localhost:5228/");
+            _configurationMock.Setup(c => c["JwtSettings:Audience"]).Returns("http://localhost:5228");
+            
+            var httpContext = new DefaultHttpContext();
+            var controllerContext = new ControllerContext()
+            {
+                HttpContext = httpContext
+            };
+            _accountController.ControllerContext = controllerContext;
 
             // Act
             var result = await _accountController.Login(loginViewModel);
@@ -184,7 +191,6 @@ namespace Libro.Tests.Controllers
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString())
             }, CookieAuthenticationDefaults.AuthenticationScheme));
 
-            _authenticationServiceMock.Setup(a => a.SignInAsync(context, It.IsAny<string>(), It.IsAny<ClaimsPrincipal>())).Returns(Task.CompletedTask);
             _userManagementServiceMock.Setup(u => u.GetUserByIdAsync(userId)).ReturnsAsync(userDTO);
             _userManagementServiceMock.Setup(u => u.GetBorrowingHistoryAsync(userId)).ReturnsAsync(new List<BookTransactionDTO>());
             _userManagementServiceMock.Setup(u => u.GetCurrentLoansAsync(userId)).ReturnsAsync(new List<BookTransactionDTO>());

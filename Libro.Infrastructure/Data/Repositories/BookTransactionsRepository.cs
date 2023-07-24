@@ -24,14 +24,14 @@ namespace Libro.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<bool> CreateTransactionAsync(BookTransaction transaction)
+        public async Task<BookTransaction> CreateTransactionAsync(BookTransaction transaction)
         {
             try
             {
                 _context.BookTransactions.Add(transaction);
                 await _context.SaveChangesAsync();
 
-                return true;
+                return transaction;
             }
             catch (Exception ex)
             {

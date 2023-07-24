@@ -34,9 +34,11 @@ namespace Libro.Application.Services
         public async Task<ReadingListDTO> CreateReadingListAsync(int userId)
         {
             var readingList = new ReadingList { UserId = userId };
-            var createdReadingList = await _readingListRepository.CreateReadingListAsync(readingList);
-            return _mapper.Map<ReadingListDTO>(readingList); 
+            var readingListCreated = await _readingListRepository.CreateReadingListAsync(readingList);
+
+            return _mapper.Map<ReadingListDTO>(readingListCreated);
         }
+
 
         public async Task<bool> AddBookToReadingListAsync(int readingListId, int bookId)
         {

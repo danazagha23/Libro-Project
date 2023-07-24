@@ -170,7 +170,7 @@ namespace Libro.Infrastructure.Data.Repositories
                 return await _context.BookTransactions
                     .Include(b => b.Book)
                     .Include(p => p.Patron)
-                    .Where(t => t.PatronId == patronId)
+                    .Where(t => t.PatronId == patronId && t.TransactionType != TransactionType.Returned)
                     .ToListAsync();
             }
             catch (Exception ex)

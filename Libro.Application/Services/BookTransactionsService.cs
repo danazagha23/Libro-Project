@@ -69,7 +69,7 @@ namespace Libro.Application.Services
                 IsReturned = false
             };
 
-            await _transactionsRepository.CreateTransactionAsync(bookTransaction);
+            var transaction = await _transactionsRepository.CreateTransactionAsync(bookTransaction);
 
             book.AvailabilityStatus = AvailabilityStatus.Reserved;
             await _bookRepository.UpdateBookAsync(bookId, book);

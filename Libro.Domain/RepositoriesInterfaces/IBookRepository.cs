@@ -12,7 +12,7 @@ namespace Libro.Domain.RepositoriesInterfaces
         Task<ICollection<Book>> GetAllBooksAsync();
         Task<Book> GetBookByIdAsync(int bookId);
 
-        Task<bool> CreateBookAsync(Book book);
+        Task<Book> CreateBookAsync(Book book);
         Task<BookAuthor> CreateBookAuthorAsync(int bookId, int authorId);
         Task<Book> UpdateBookAsync(int bookId, Book book);
         Task<bool> DeleteBookAsync(int bookId);

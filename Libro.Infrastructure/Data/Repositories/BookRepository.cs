@@ -73,14 +73,14 @@ namespace Libro.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<bool> CreateBookAsync(Book book)
+        public async Task<Book> CreateBookAsync(Book book)
         {
             try
             {
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
 
-                return true;
+                return book;
             }
             catch (Exception ex)
             {
