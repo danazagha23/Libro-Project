@@ -13,7 +13,7 @@ namespace Libro.Domain.RepositoriesInterfaces
         Task<Author> GetAuthorByIdAsync(int authorId);
         Task<Author> GetAuthorByNameAsync(string authorName);
 
-        Task<bool> CreateAuthorAsync(Author author);
+        Task<Author> CreateAuthorAsync(Author author);
         Task<Author> UpdateAuthorAsync(int authorId, Author authorDTO);
         Task<bool> DeleteAuthorAsync(int authorId);
     }
