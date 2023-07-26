@@ -70,7 +70,7 @@ To run the Libro Library Management System locally, follow these steps:
 4. Install dependencies: `dotnet restore`
 5. Build the project: `dotnet build`
 6. Run the application: `dotnet run`
-7. Access the application in your web browser at `http://localhost:5228`
+7. Access the application in your web browser at `http://localhost:5228` or `https://localhost:7292`
 
 ## Technologies and Frameworks Used
 
