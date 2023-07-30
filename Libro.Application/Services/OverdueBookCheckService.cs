@@ -48,14 +48,12 @@ public class OverdueBookCheckService : IHostedService, IDisposable
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        // Stop the timer when the service is stopped
         _timer?.Change(Timeout.Infinite, 0);
         return Task.CompletedTask;
     }
 
     public void Dispose()
     {
-        // Dispose of the timer
         _timer?.Dispose();
     }
 }
