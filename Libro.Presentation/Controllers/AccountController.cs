@@ -135,7 +135,7 @@ namespace Libro.Presentation.Controllers
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1), // Token expiration time
+                expires: DateTime.UtcNow.AddHours(1), 
                 signingCredentials: credentials
             );
 
@@ -172,9 +172,8 @@ namespace Libro.Presentation.Controllers
             Response.Cookies.Append("accessToken", "", new CookieOptions
             {
                 HttpOnly = true,
-                // Set the same Site and Path as you used when creating the cookie
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(-1) // Set the expiration to a past date
+                Expires = DateTime.UtcNow.AddDays(-1) 
             }); 
 
             return RedirectToAction("Index", "Home");

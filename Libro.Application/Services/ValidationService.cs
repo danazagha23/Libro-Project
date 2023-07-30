@@ -29,7 +29,6 @@ namespace Libro.Application.Services
         }
         public void ValidatePassword(string password)
         {
-            // Example: Password must have at least 8 characters
             if(!string.IsNullOrWhiteSpace(password) && password.Length < 8)
             {
                 throw new ArgumentException("Password must have at least 8 characters");

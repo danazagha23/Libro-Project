@@ -39,8 +39,6 @@ namespace Libro.Presentation.Controllers
             try
             {
                 await _bookTransactionsService.ReserveBookAsync(bookId, patronId);
-                //var successMessage = "Book reserved successfully";
-                //TempData["SuccessMessage"] = successMessage;
                 return RedirectToAction("BookDetails", "Books", new { id = bookId});
             }
             catch (Exception ex)

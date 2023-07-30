@@ -122,7 +122,6 @@ namespace Libro.Application.Services
                 // Hash the provided password
                 string hashedInput = HashPassword(password);
 
-                // Compare the hashed password with the stored hashed password
                 return string.Equals(hashedInput, hashedPassword);
             }
         }
@@ -134,10 +133,8 @@ namespace Libro.Application.Services
                 // Convert the password to bytes
                 byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
 
-                // Compute the hash
                 byte[] hashBytes = sha256.ComputeHash(passwordBytes);
 
-                // Convert the hash bytes to a hexadecimal string
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; i++)
                 {

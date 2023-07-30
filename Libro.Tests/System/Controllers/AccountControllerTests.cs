@@ -165,7 +165,10 @@ namespace Libro.Tests.Controllers
         public async Task Login_POST_InvalidModel_ReturnsViewWithModel()
         {
             // Arrange
-            var loginViewModel = new LoginViewModel { /* populate with invalid data */ };
+            var loginViewModel = new LoginViewModel 
+            {
+                Username = "dana"
+            };
 
             _accountController.ModelState.AddModelError("error", "Some error message");
 
