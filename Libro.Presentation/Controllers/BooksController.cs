@@ -52,7 +52,7 @@ namespace Libro.Presentation.Controllers
             var searchViewModel = new SearchViewModel
             {
                 Genres = genreNames,
-                AllBooks = pagedAllBooks,
+                AllBooks = allBooks.ToList(),
                 FilteredBooks = pagedFilteredBooks,
                 BookGenre = bookGenre,
                 AllAuthors = authors.ToList(),

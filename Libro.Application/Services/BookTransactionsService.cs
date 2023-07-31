@@ -4,6 +4,7 @@ using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Domain.RepositoriesInterfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,124 +20,182 @@ namespace Libro.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IBookTransactionsRepository _transactionsRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<BookTransactionsService> _logger;
 
-        public BookTransactionsService(IBookRepository bookRepository, IUserRepository userRepository, IBookTransactionsRepository transactionsRepository, IMapper mapper)
+        public BookTransactionsService(IBookRepository bookRepository, IUserRepository userRepository, IBookTransactionsRepository transactionsRepository, IMapper mapper, ILogger<BookTransactionsService> logger)
         {
             _bookRepository = bookRepository;
             _userRepository = userRepository;
             _transactionsRepository = transactionsRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<bool> CreateTransactionAsync(BookTransactionDTO transactionDTO)
         {
-            var transaction = _mapper.Map<BookTransaction>(transactionDTO);
-            await _transactionsRepository.CreateTransactionAsync(transaction);
+            try
+            {
+                var transaction = _mapper.Map<BookTransaction>(transactionDTO);
+                await _transactionsRepository.CreateTransactionAsync(transaction);
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating a new transaction.");
+                throw;
+            }
         }
 
         public async Task<bool> DeleteTransactionAsync(int transactionId)
         {
-            return await _transactionsRepository.DeleteTransactionAsync(transactionId);
+            try
+            {
+                return await _transactionsRepository.DeleteTransactionAsync(transactionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while deleting transaction with ID {transactionId}.");
+                throw;
+            }
         }
 
         public async Task<ICollection<BookTransactionDTO>> GetAllBookTransactionsAsync()
         {
-            var transactions = await _transactionsRepository.GetAllBookTransactionsAsync();
-            var transactionsDTO = _mapper.Map<IEnumerable<BookTransactionDTO>>(transactions);
+            try
+            {
+                var transactions = await _transactionsRepository.GetAllBookTransactionsAsync();
+                var transactionsDTO = _mapper.Map<IEnumerable<BookTransactionDTO>>(transactions);
 
-            return transactionsDTO.ToList();
-        } 
+                return transactionsDTO.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting all book transactions.");
+                throw;
+            }
+        }
 
         public async Task ReserveBookAsync(int bookId, int patronId)
         {
-            var book = await _bookRepository.GetBookByIdAsync(bookId);
-            var patron = await _userRepository.GetUserByIdAsync(patronId);
-
-            if (book.AvailabilityStatus != AvailabilityStatus.Available)
+            try
             {
-                throw new Exception("This book is not available for borrowing");
+                var book = await _bookRepository.GetBookByIdAsync(bookId);
+                var patron = await _userRepository.GetUserByIdAsync(patronId);
+
+                if (book.AvailabilityStatus != AvailabilityStatus.Available)
+                {
+                    throw new Exception("This book is not available for borrowing");
+                }
+
+                BookTransaction bookTransaction = new BookTransaction
+                {
+                    PatronId = patronId,
+                    BookId = bookId,
+                    TransactionDate = DateTime.Now,
+                    TransactionType = TransactionType.Reserved,
+                    DueDate = DateTime.Now.AddDays(14),
+                    IsReturned = false
+                };
+
+                var transaction = await _transactionsRepository.CreateTransactionAsync(bookTransaction);
+
+                book.AvailabilityStatus = AvailabilityStatus.Reserved;
+                await _bookRepository.UpdateBookAsync(bookId, book);
             }
-
-            BookTransaction bookTransaction = new BookTransaction
+            catch (Exception ex)
             {
-                PatronId = patronId,
-                BookId = bookId,
-                TransactionDate = DateTime.Now,
-                TransactionType = TransactionType.Reserved,
-                DueDate = DateTime.Now.AddDays(14),
-                IsReturned = false
-            };
-
-            var transaction = await _transactionsRepository.CreateTransactionAsync(bookTransaction);
-
-            book.AvailabilityStatus = AvailabilityStatus.Reserved;
-            await _bookRepository.UpdateBookAsync(bookId, book);
+                _logger.LogError(ex, $"An error occurred while reserving book with ID {bookId} for patron with ID {patronId}.");
+                throw;
+            }
         }
 
         public async Task CheckOutBookAsync(int transactionId)
         {
-            var transaction = await _transactionsRepository.GetTransactionByIdAsync(transactionId);
-
-            if (transaction == null)
+            try
             {
-                throw new Exception("Book transaction not found");
-            }
+                var transaction = await _transactionsRepository.GetTransactionByIdAsync(transactionId);
 
-            if (transaction.TransactionType != TransactionType.Reserved || transaction.IsReturned)
+                if (transaction == null)
+                {
+                    throw new Exception("Book transaction not found");
+                }
+
+                if (transaction.TransactionType != TransactionType.Reserved || transaction.IsReturned)
+                {
+                    throw new Exception("Invalid book transaction for check-out");
+                }
+
+                transaction.TransactionType = TransactionType.Borrowed;
+                transaction.TransactionDate = DateTime.Now;
+                transaction.DueDate = DateTime.Now.AddDays(14);
+
+                var book = await _bookRepository.GetBookByIdAsync(transaction.BookId);
+                if (book == null)
+                {
+                    throw new Exception("Book not found");
+                }
+                book.AvailabilityStatus = AvailabilityStatus.Borrowed;
+
+                await _transactionsRepository.UpdateTransactionAsync(transactionId, transaction);
+                await _bookRepository.UpdateBookAsync(book.BookId, book);
+            }
+            catch (Exception ex)
             {
-                throw new Exception("Invalid book transaction for check-out");
+                _logger.LogError(ex, $"An error occurred while checking out book with transaction ID {transactionId}.");
+                throw;
             }
-
-            transaction.TransactionType = TransactionType.Borrowed;
-            transaction.TransactionDate = DateTime.Now;
-            transaction.DueDate = DateTime.Now.AddDays(14);
-
-            var book = await _bookRepository.GetBookByIdAsync(transaction.BookId);
-            if (book == null)
-            {
-                throw new Exception("Book not found");
-            }
-            book.AvailabilityStatus = AvailabilityStatus.Borrowed;
-
-            await _transactionsRepository.UpdateTransactionAsync(transactionId, transaction);
-            await _bookRepository.UpdateBookAsync(book.BookId, book);
         }
 
         public async Task AcceptReturnAsync(int transactionId)
         {
-            var transaction = await _transactionsRepository.GetTransactionByIdAsync(transactionId);
-
-            if (transaction == null)
+            try
             {
-                throw new Exception("Book transaction not found");
-            }
+                var transaction = await _transactionsRepository.GetTransactionByIdAsync(transactionId);
 
-            if (transaction.TransactionType != TransactionType.Borrowed || transaction.IsReturned)
+                if (transaction == null)
+                {
+                    throw new Exception("Book transaction not found");
+                }
+
+                if (transaction.TransactionType != TransactionType.Borrowed || transaction.IsReturned)
+                {
+                    throw new Exception("Invalid book transaction for return");
+                }
+
+                transaction.TransactionType = TransactionType.Returned;
+                transaction.IsReturned = true;
+
+                var book = await _bookRepository.GetBookByIdAsync(transaction.BookId);
+                if (book == null)
+                {
+                    throw new Exception("Book not found");
+                }
+                book.AvailabilityStatus = AvailabilityStatus.Available;
+
+                await _transactionsRepository.UpdateTransactionAsync(transactionId, transaction);
+                await _bookRepository.UpdateBookAsync(book.BookId, book);
+            }
+            catch (Exception ex)
             {
-                throw new Exception("Invalid book transaction for return");
+                _logger.LogError(ex, $"An error occurred while accepting return for transaction with ID {transactionId}.");
+                throw;
             }
-
-            transaction.TransactionType = TransactionType.Returned;
-            transaction.IsReturned = true;
-
-            var book = await _bookRepository.GetBookByIdAsync(transaction.BookId);
-            if (book == null)
-            {
-                throw new Exception("Book not found");
-            }
-            book.AvailabilityStatus = AvailabilityStatus.Available;
-
-            await _transactionsRepository.UpdateTransactionAsync(transactionId, transaction);
-            await _bookRepository.UpdateBookAsync(book.BookId, book);
         }
 
         public async Task<ICollection<BookTransactionDTO>> FindTransactionsAsync(string selectedType, string SelectedPatron, string SelectedBook)
         {
-            var searchResults = await _transactionsRepository.FindTransactionsAsync(selectedType, SelectedPatron, SelectedBook);
+            try
+            {
+                var searchResults = await _transactionsRepository.FindTransactionsAsync(selectedType, SelectedPatron, SelectedBook);
 
-            return _mapper.Map<ICollection<BookTransactionDTO>>(searchResults).ToList();
+                return _mapper.Map<ICollection<BookTransactionDTO>>(searchResults).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while searching for book transactions.");
+                throw;
+            }
         }
 
     }

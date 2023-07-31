@@ -19,21 +19,18 @@ namespace Libro.Tests.Controllers
         private readonly Mock<IReadingListService> _readingListServiceMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly Mock<IConfiguration> _configurationMock;
-        private readonly Mock<Application.ServicesInterfaces.IAuthenticationService> _authenticationServiceMock;
         private readonly AccountController _accountController;
 
         public AccountControllerTests()
         {
             _userManagementServiceMock = new Mock<IUserManagementService>();
             _readingListServiceMock = new Mock<IReadingListService>();
-            _authenticationServiceMock = new Mock<Application.ServicesInterfaces.IAuthenticationService>();
             _mapperMock = new Mock<IMapper>();
             _configurationMock = new Mock<IConfiguration>();
             _accountController = new AccountController(
                 _userManagementServiceMock.Object,
                 _readingListServiceMock.Object,
                 _mapperMock.Object,
-                _authenticationServiceMock.Object,
                 _configurationMock.Object
             );
         }

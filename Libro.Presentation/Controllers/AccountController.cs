@@ -22,19 +22,16 @@ namespace Libro.Presentation.Controllers
         private readonly IReadingListService _readingListRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
-        private readonly Application.ServicesInterfaces.IAuthenticationService _authenticationService;
 
         public AccountController(
             IUserManagementService userManagementService,
             IReadingListService readingListService,
             IMapper mapper,
-            Application.ServicesInterfaces.IAuthenticationService authenticationService,
             IConfiguration configuration)
         {
             _userManagementService = userManagementService;
             _readingListRepository = readingListService;
             _mapper = mapper;
-            _authenticationService = authenticationService;
             _configuration = configuration;
         }
 
