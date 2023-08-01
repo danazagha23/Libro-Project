@@ -5,6 +5,7 @@ using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Domain.RepositoriesInterfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace Libro.Tests.Services
         private readonly Mock<IGenreRepository> _genreRepositoryMock;
         private readonly Mock<IValidationService> _validationServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<UserManagementService>> _loggerMock;
         private readonly UserManagementService _userManagementService;
 
         public UserManagementServiceTests()
@@ -33,7 +35,16 @@ namespace Libro.Tests.Services
             _genreRepositoryMock = new Mock<IGenreRepository>();
             _validationServiceMock = new Mock<IValidationService>();
             _mapperMock = new Mock<IMapper>();
-            _userManagementService = new UserManagementService(_userRepositoryMock.Object, _bookRepositoryMock.Object, _readingListRepositoryMock.Object, _validationServiceMock.Object, _mapperMock.Object, _genreRepositoryMock.Object);
+            _loggerMock = new Mock<ILogger<UserManagementService>>();
+            _userManagementService = new UserManagementService(
+                _userRepositoryMock.Object,
+                _bookRepositoryMock.Object,
+                _readingListRepositoryMock.Object,
+                _validationServiceMock.Object,
+                _mapperMock.Object,
+                _genreRepositoryMock.Object,
+                _loggerMock.Object
+                );
         }
 
         [Fact]

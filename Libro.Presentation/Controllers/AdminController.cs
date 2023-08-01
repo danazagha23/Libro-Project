@@ -2,7 +2,9 @@
 using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
+using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
@@ -14,12 +16,14 @@ namespace Libro.Presentation.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly IValidationService _validationService;
         private readonly IMapper _mapper;
+        private readonly IPaginationWrapper<UserDTO> _paginationWrapper;
 
-        public AdminController(IUserManagementService userManagementService,IValidationService validationService, IMapper mapper)
+        public AdminController(IUserManagementService userManagementService,IValidationService validationService, IMapper mapper, IPaginationWrapper<UserDTO> paginationWrapper)
         {
             _userManagementService = userManagementService;
             _validationService = validationService;
             _mapper = mapper;
+            _paginationWrapper = paginationWrapper;
         }
 
         [Authorize(Roles = "Administrator")]
@@ -46,30 +50,28 @@ namespace Libro.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> Patrons(string selectedPatron, int page = 1, int pageSize = 5)
         {
-            var users = await _userManagementService.GetAllUsersAsync();
-            var patronsDTOs = users.Where(p => p.Role.ToString() == "Patron");
+            var patronsDTOs = await _userManagementService.GetUsersByRoleAsync(UserRole.Patron);
 
-            IEnumerable<UserDTO> filteredPatrons;
+            ICollection<UserDTO> filteredPatrons;
             if (!string.IsNullOrEmpty(selectedPatron))
             {
-                filteredPatrons = patronsDTOs.Where(p => p.Username.Contains(selectedPatron));
+                filteredPatrons = patronsDTOs.Where(p => p.Username.Contains(selectedPatron)).ToList();
             }
             else
             {
-                filteredPatrons = patronsDTOs;
+                filteredPatrons = patronsDTOs.ToList();
             }
 
-            var pagedAllPatrons = patronsDTOs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var pagedFilteredPatrons = filteredPatrons.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedFilteredPatrons = _paginationWrapper.GetPage(filteredPatrons, page, pageSize).ToList();
 
             var patronsViewModel = new UsersViewModel
             {
-                Users = pagedAllPatrons.ToList(),
+                Users = patronsDTOs.ToList(),
                 FilteredUsers = pagedFilteredPatrons.ToList(),
                 SelectedUser = selectedPatron,
 
                 PageNumber = page,
-                TotalPages = (int)Math.Ceiling((double)filteredPatrons.Count() / pageSize)
+                TotalPages = _paginationWrapper.GetTotalPages(filteredPatrons.ToList(), pageSize)
             };
 
             return View(patronsViewModel);
@@ -127,30 +129,28 @@ namespace Libro.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> Librarians(string selectedLibrarian, int page = 1, int pageSize = 5)
         {
-            var users = await _userManagementService.GetAllUsersAsync();
-            var librariansDTOs = users.Where(p => p.Role.ToString() == "Librarian");
+            var librarians = await _userManagementService.GetUsersByRoleAsync(UserRole.Librarian);
 
-            IEnumerable<UserDTO> filteredLibrarians;
+            ICollection<UserDTO> filteredLibrarians;
             if (!string.IsNullOrEmpty(selectedLibrarian))
             {
-                filteredLibrarians = librariansDTOs.Where(p => p.Username.Contains(selectedLibrarian));
+                filteredLibrarians = librarians.Where(p => p.Username.Contains(selectedLibrarian)).ToList();
             }
             else
             {
-                filteredLibrarians = librariansDTOs;
+                filteredLibrarians = librarians.ToList();
             }
 
-            var pagedAllLibrarians = librariansDTOs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var pagedFilteredLibrarians = filteredLibrarians.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedFilteredLibrarians = _paginationWrapper.GetPage(filteredLibrarians, page, pageSize).ToList();
 
             var librariansViewModel = new UsersViewModel
             {
-                Users = pagedAllLibrarians.ToList(),
+                Users = librarians.ToList(),
                 FilteredUsers = pagedFilteredLibrarians.ToList(),
                 SelectedUser = selectedLibrarian,
 
                 PageNumber = page,
-                TotalPages = (int)Math.Ceiling((double)filteredLibrarians.Count() / pageSize)
+                TotalPages = _paginationWrapper.GetTotalPages(filteredLibrarians.ToList(), pageSize)
             };
 
             return View(librariansViewModel);

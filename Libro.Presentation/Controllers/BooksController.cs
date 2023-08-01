@@ -5,6 +5,7 @@ using Libro.Application.DTOs;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,8 +26,9 @@ namespace Libro.Presentation.Controllers
         private readonly IReadingListService _readingListService;
         private readonly IReviewService _reviewService;
         private readonly IMapper _mapper;
+        private readonly IPaginationWrapper<BookDTO> _paginationWrapper;
 
-        public BooksController(IBookManagementService bookManagementService, IGenreManagementService genreManagementService,IAuthorManagementService authorManagementService, IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper, IReviewService reviewService)
+        public BooksController(IBookManagementService bookManagementService, IGenreManagementService genreManagementService,IAuthorManagementService authorManagementService, IUserManagementService userManagementService, IReadingListService readingListService, IMapper mapper, IReviewService reviewService, IPaginationWrapper<BookDTO> paginationWrapper)
         {
             _bookManagementService = bookManagementService;
             _genreManagementService = genreManagementService;
@@ -35,6 +37,7 @@ namespace Libro.Presentation.Controllers
             _readingListService = readingListService;
             _mapper = mapper;
             _reviewService = reviewService;
+            _paginationWrapper = paginationWrapper;
         }
 
         [HttpGet]
@@ -46,8 +49,7 @@ namespace Libro.Presentation.Controllers
             var genres = await _genreManagementService.GetAllGenresAsync();
             var genreNames = genres.Select(g => g.Name).ToList();
 
-            var pagedAllBooks = allBooks.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var pagedFilteredBooks = searchResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedFilteredBooks = _paginationWrapper.GetPage(searchResults, page, pageSize).ToList();
 
             var searchViewModel = new SearchViewModel
             {
@@ -61,7 +63,7 @@ namespace Libro.Presentation.Controllers
                 AvailabilityStatus = availabilityStatus,
 
                 PageNumber = page,
-                TotalPages = (int)Math.Ceiling((double)searchResults.Count() / pageSize)
+                TotalPages = _paginationWrapper.GetTotalPages(searchResults.ToList(), pageSize)
             };
 
             return View(searchViewModel);

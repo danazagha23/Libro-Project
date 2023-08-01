@@ -2,6 +2,7 @@
 using Libro.Application.DTOs;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,13 @@ namespace Libro.Presentation.Controllers
     {
         private readonly IAuthorManagementService _authorManagementService;
         private readonly IMapper _mapper;
+        private readonly IPaginationWrapper<AuthorDTO> _paginationWrapper;
 
-        public AuthorsController(IAuthorManagementService authorManagementService, IMapper mapper)
+        public AuthorsController(IAuthorManagementService authorManagementService, IMapper mapper, IPaginationWrapper<AuthorDTO> paginationWrapper)
         {
             _authorManagementService = authorManagementService;
             _mapper = mapper;   
+            _paginationWrapper = paginationWrapper;
         }
 
         [Authorize(Roles = "Librarian")]
@@ -25,27 +28,26 @@ namespace Libro.Presentation.Controllers
         {
             var authors = await _authorManagementService.GetAllAuthorsAsync();
 
-            IEnumerable<AuthorDTO> filteredAuthors;
+            ICollection<AuthorDTO> filteredAuthors;
             if (!string.IsNullOrEmpty(selectedAuthor))
             {
-                filteredAuthors = authors.Where(a => a.AuthorName.Contains(selectedAuthor));
+                filteredAuthors = authors.Where(a => a.AuthorName.Contains(selectedAuthor)).ToList();
             }
             else
             {
                 filteredAuthors = authors;
             }
 
-            var pagedAllAuthor = authors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var pagedFilteredAuthors = filteredAuthors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedFilteredAuthors = _paginationWrapper.GetPage(filteredAuthors, page, pageSize).ToList();
 
             var authorsViewModel = new AuthorsViewModel
             {
-                Authors = pagedAllAuthor.ToList(),
+                Authors = authors.ToList(),
                 FilteredAuthors = pagedFilteredAuthors.ToList(),
                 SelectedAuthor = selectedAuthor,
 
                 PageNumber = page,
-                TotalPages = (int)Math.Ceiling((double)filteredAuthors.Count() / pageSize)
+                TotalPages = _paginationWrapper.GetTotalPages(filteredAuthors.ToList(), pageSize)
             };
 
             return View(authorsViewModel);

@@ -3,6 +3,7 @@ using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
 using Libro.Presentation.Controllers;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -19,6 +20,7 @@ namespace Libro.Tests.Controllers
         private readonly Mock<IUserManagementService> _userManagementServiceMock;
         private readonly Mock<IValidationService> _validationServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IPaginationWrapper<UserDTO>> _paginationWrapper;
         private readonly AdminController _controller;
 
         public AdminControllerTests()
@@ -26,10 +28,12 @@ namespace Libro.Tests.Controllers
             _userManagementServiceMock = new Mock<IUserManagementService>();
             _validationServiceMock = new Mock<IValidationService>();
             _mapperMock = new Mock<IMapper>();
+            _paginationWrapper = new Mock<IPaginationWrapper<UserDTO>>();
             _controller = new AdminController(
                 _userManagementServiceMock.Object,
                 _validationServiceMock.Object,
-                _mapperMock.Object
+                _mapperMock.Object,
+                _paginationWrapper.Object
             );
         }
 
@@ -73,30 +77,48 @@ namespace Libro.Tests.Controllers
         public async Task Patrons_ReturnsViewWithViewModel()
         {
             // Arrange
-            var users = new List<UserDTO>
+            var Patrons = new List<UserDTO>
             {
                 new UserDTO { UserId = 1, Username = "user1", Role = UserRole.Patron },
-                new UserDTO { UserId = 2, Username = "user2", Role = UserRole.Patron }
-            };
-            var filteredUsers = new List<UserDTO>
-            {
-                new UserDTO { UserId = 2, Username = "user2", Role = UserRole.Patron }
+                new UserDTO { UserId = 2, Username = "user2", Role = UserRole.Patron },
+                new UserDTO { UserId = 3, Username = "user3", Role = UserRole.Patron },
+                new UserDTO { UserId = 4, Username = "user4", Role = UserRole.Patron },
+                new UserDTO { UserId = 5, Username = "user5", Role = UserRole.Patron },
+                new UserDTO { UserId = 6, Username = "user6", Role = UserRole.Patron },
+                new UserDTO { UserId = 7, Username = "dana", Role = UserRole.Patron }
             };
 
-            _userManagementServiceMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(users);
+            var filteredUsers = Patrons.Where(user => user.Username.Contains("user")).ToList();
+
+            var firstPageUsers = new List<UserDTO>
+            {
+                new UserDTO { UserId = 1, Username = "user1", Role = UserRole.Patron },
+                new UserDTO { UserId = 2, Username = "user2", Role = UserRole.Patron },
+                new UserDTO { UserId = 3, Username = "user3", Role = UserRole.Patron },
+                new UserDTO { UserId = 4, Username = "user4", Role = UserRole.Patron },
+                new UserDTO { UserId = 5, Username = "user5", Role = UserRole.Patron }
+            };
+            var secondPageUsers = new List<UserDTO>
+            {
+                new UserDTO { UserId = 6, Username = "user6", Role = UserRole.Patron }
+            };
+
+            _userManagementServiceMock.Setup(x => x.GetUsersByRoleAsync(UserRole.Patron)).ReturnsAsync(Patrons);
+            _paginationWrapper.Setup(x => x.GetPage(filteredUsers, 1, 5)).Returns(firstPageUsers);
+            _paginationWrapper.Setup(x => x.GetPage(filteredUsers, 2, 5)).Returns(secondPageUsers);
+            _paginationWrapper.Setup(x => x.GetTotalPages(filteredUsers, 5)).Returns(2);
 
             // Act
-            var result = await _controller.Patrons("user2", 1, 5) as ViewResult;
+            var result = await _controller.Patrons("user", 1, 5) as ViewResult;
 
             // Assert
             Assert.NotNull(result);
             var model = Assert.IsType<UsersViewModel>(result.Model);
 
-            Assert.Equal(users, model.Users);
-            Assert.Equal(filteredUsers.First().UserId, 2);
-            Assert.Equal(filteredUsers.Count(), 1);
+            Assert.Equal(Patrons, model.Users);
+            Assert.Equal(firstPageUsers, model.FilteredUsers);
             Assert.Equal(1, model.PageNumber);
-            Assert.Equal(1, model.TotalPages);
+            Assert.Equal(2, model.TotalPages);
         }
 
         [Fact]
@@ -191,7 +213,9 @@ namespace Libro.Tests.Controllers
                 new UserDTO { Role = UserRole.Librarian }
             };
 
-            _userManagementServiceMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(users);
+            _userManagementServiceMock.Setup(x => x.GetUsersByRoleAsync(UserRole.Librarian)).ReturnsAsync(users);
+            _paginationWrapper.Setup(x => x.GetPage(users, 1, 5)).Returns(users);
+            _paginationWrapper.Setup(x => x.GetTotalPages(users, 5)).Returns(1);
 
             // Act
             var result = await _controller.Librarians(null, 1, 5) as ViewResult;
@@ -199,7 +223,7 @@ namespace Libro.Tests.Controllers
             // Assert
             Assert.NotNull(result);
             var model = Assert.IsType<UsersViewModel>(result.Model);
-
+            
             Assert.Equal(users, model.Users);
             Assert.Equal(users, model.FilteredUsers);
             Assert.Null(model.SelectedUser);

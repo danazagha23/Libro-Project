@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "BookDetails";
          
-    var isBookInReadingList = Model.IsBookInReadingList; // Check if the book is already in the reading list
+    var isBookInReadingList = Model.IsBookInReadingList; 
     var toggleButtonText = isBookInReadingList ? "Remove from Reading List" : "Add to Reading List";
     var toggleButtonClass = isBookInReadingList ? "btn-danger" : "btn-primary";
 }

@@ -4,6 +4,7 @@ using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.RepositoriesInterfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,13 +16,19 @@ namespace Libro.Tests.Services
     {
         private readonly Mock<IGenreRepository> _genreRepositoryMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<GenreManagementService>> _loggerMock;
         private readonly GenreManagementService _genreManagementService;
 
         public GenreManagementServiceTests()
         {
             _genreRepositoryMock = new Mock<IGenreRepository>();
             _mapperMock = new Mock<IMapper>();
-            _genreManagementService = new GenreManagementService(_genreRepositoryMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<GenreManagementService>>();
+            _genreManagementService = new GenreManagementService
+                (_genreRepositoryMock.Object,
+                _mapperMock.Object,
+                _loggerMock.Object
+                );
         }
 
         [Fact]
