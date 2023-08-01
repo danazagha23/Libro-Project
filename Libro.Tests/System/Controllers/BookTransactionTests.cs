@@ -2,6 +2,7 @@
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
 using Libro.Presentation.Controllers;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ namespace Libro.Tests.Controllers
         private readonly Mock<IBookManagementService> _bookManagementServiceMock;
         private readonly Mock<IUserManagementService> _userManagementServiceMock;
         private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly Mock<IPaginationWrapper<BookTransactionDTO>> _paginationWrapper;
         private readonly BookTransactionsController _bookTransactionsController;
 
         public BookTransactionsControllerTests()
@@ -28,12 +30,12 @@ namespace Libro.Tests.Controllers
             _bookTransactionsServiceMock = new Mock<IBookTransactionsService>();
             _bookManagementServiceMock = new Mock<IBookManagementService>();
             _userManagementServiceMock = new Mock<IUserManagementService>();
-            _notificationServiceMock = new Mock<INotificationService>();
+            _paginationWrapper = new Mock<IPaginationWrapper<BookTransactionDTO>>();
             _bookTransactionsController = new BookTransactionsController(
                 _bookTransactionsServiceMock.Object,
                 _bookManagementServiceMock.Object,
                 _userManagementServiceMock.Object,
-                _notificationServiceMock.Object
+                _paginationWrapper.Object
             );
         }
 
@@ -128,17 +130,17 @@ namespace Libro.Tests.Controllers
             var selectedType = "Borrowed";
             var selectedPatron = "1";
             var selectedBook = "1";
-            var page = 1;
-            var pageSize = 5;
 
             _bookTransactionsServiceMock.Setup(s => s.GetAllBookTransactionsAsync()).ReturnsAsync(transactions);
             _bookTransactionsServiceMock.Setup(s => s.FindTransactionsAsync(selectedType, selectedPatron, selectedBook))
                 .ReturnsAsync(filteredTransactions);
             _userManagementServiceMock.Setup(s => s.GetAllUsersAsync()).ReturnsAsync(users);
             _bookManagementServiceMock.Setup(s => s.GetAllBooksAsync()).ReturnsAsync(books);
+            _paginationWrapper.Setup(x => x.GetPage(filteredTransactions, 1, 5)).Returns(filteredTransactions);
+            _paginationWrapper.Setup(x => x.GetTotalPages(filteredTransactions, 5)).Returns(1);
 
             // Act
-            var result = await _bookTransactionsController.Index(selectedType, selectedPatron, selectedBook, page, pageSize);
+            var result = await _bookTransactionsController.Index(selectedType, selectedPatron, selectedBook, 1, 5);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
@@ -151,7 +153,7 @@ namespace Libro.Tests.Controllers
             Assert.Equal(selectedType, transactionsViewModel.SelectedType);
             Assert.Equal(selectedPatron, transactionsViewModel.SelectedPatron);
             Assert.Equal(selectedBook, transactionsViewModel.SelectedBook);
-            Assert.Equal(page, transactionsViewModel.PageNumber);
+            Assert.Equal(1, transactionsViewModel.PageNumber);
 
             _bookTransactionsServiceMock.Verify();
             _userManagementServiceMock.Verify();

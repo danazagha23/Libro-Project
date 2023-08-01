@@ -28,21 +28,30 @@ public class OverdueBookCheckService : IHostedService, IDisposable
 
     private async Task CheckOverdueBooks()
     {
-        using (var scope = _scopeFactory.CreateScope())
+        try
         {
-            var bookTransactionsService = scope.ServiceProvider.GetRequiredService<IBookTransactionsService>();
-            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-            var allTrans = await bookTransactionsService.GetAllBookTransactionsAsync();
-            // Get the list of overdue books
-            var overdueBooks = allTrans.Where(t => t.TransactionType == TransactionType.Borrowed && !t.IsReturned && t.DueDate <= DateTime.Now);
-
-            // Process each overdue book and send notifications
-            foreach (var book in overdueBooks)
+            using (var scope = _scopeFactory.CreateScope())
             {
-                var message = $"The book with title {book.Book.Title} is overdue. Please return it as soon as possible.";
-                await notificationService.CreateNotificationAsync(book.PatronId, message);
+                var bookTransactionsService = scope.ServiceProvider.GetRequiredService<IBookTransactionsService>();
+                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                var allTrans = await bookTransactionsService.GetAllBookTransactionsAsync();
+                // Get the list of overdue books
+                var overdueBooks = allTrans.Where(t => t.TransactionType == TransactionType.Borrowed && !t.IsReturned && t.DueDate <= DateTime.Now);
+
+                // Process each overdue book and send notifications
+                foreach (var book in overdueBooks)
+                {
+                    var message = $"The book with title {book.Book.Title} is overdue. Please return it as soon as possible.";
+                    await notificationService.CreateNotificationAsync(book.PatronId, message);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Handle any potential exceptions that may occur during the overdue book check
+            // You can log the error, notify administrators, or take any other necessary actions.
+            Console.WriteLine($"An error occurred while checking for overdue books: {ex.Message}");
         }
     }
 

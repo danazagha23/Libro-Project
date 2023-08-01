@@ -5,6 +5,7 @@ using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Domain.RepositoriesInterfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace Libro.Tests.Services
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly Mock<IBookTransactionsRepository> _transactionsRepositoryMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<BookTransactionsService>> _loggerMock;
         private readonly BookTransactionsService _bookTransactionsService;
 
         public BookTransactionsServiceTests()
@@ -27,12 +29,14 @@ namespace Libro.Tests.Services
             _userRepositoryMock = new Mock<IUserRepository>();
             _transactionsRepositoryMock = new Mock<IBookTransactionsRepository>();
             _mapperMock = new Mock<IMapper>();
+            _loggerMock = new Mock<ILogger<BookTransactionsService>>();
 
             _bookTransactionsService = new BookTransactionsService(
                 _bookRepositoryMock.Object,
                 _userRepositoryMock.Object,
                 _transactionsRepositoryMock.Object,
-                _mapperMock.Object
+                _mapperMock.Object,
+                _loggerMock.Object
             );
         }
 

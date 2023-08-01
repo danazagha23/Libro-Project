@@ -1,6 +1,8 @@
-﻿using Libro.Application.Services;
+﻿using Libro.Application.DTOs;
+using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +15,14 @@ namespace Libro.Presentation.Controllers
         private readonly IBookTransactionsService _bookTransactionsService;
         private readonly IBookManagementService _bookManagementService;
         private readonly IUserManagementService _userManagementService;
-        private readonly INotificationService _notificationService;
+        private readonly IPaginationWrapper<BookTransactionDTO> _paginationWrapper;
 
-        public BookTransactionsController(IBookTransactionsService bookTransactionsService,IBookManagementService bookManagementService ,IUserManagementService userManagementService, INotificationService notificationService)
+        public BookTransactionsController(IBookTransactionsService bookTransactionsService,IBookManagementService bookManagementService ,IUserManagementService userManagementService, IPaginationWrapper<BookTransactionDTO> paginationWrapper)
         {
             _bookTransactionsService = bookTransactionsService;
             _bookManagementService = bookManagementService;
             _userManagementService = userManagementService;
-            _notificationService = notificationService;
+            _paginationWrapper = paginationWrapper;
         }
 
         [HttpPost]
@@ -59,12 +61,11 @@ namespace Libro.Presentation.Controllers
             var books = await _bookManagementService.GetAllBooksAsync();
             var bookTitles = books.Select(b => b.Title).ToList();
 
-            var pagedAllBooks = bookTransactions.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var pagedFilteredBooks = searchResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedFilteredBooks = _paginationWrapper.GetPage(searchResults, page, pageSize).ToList();
 
             var transactionsViewModel = new BookTransactionsViewModel
             {
-                Transactions = pagedAllBooks,
+                Transactions = bookTransactions,
                 Books = books,
                 FilteredTransactions = pagedFilteredBooks,
                 Patrons = patrons.ToList(),
@@ -73,7 +74,7 @@ namespace Libro.Presentation.Controllers
                 SelectedType = selectedType,
 
                 PageNumber = page,
-                TotalPages = (int)Math.Ceiling((double)searchResults.Count() / pageSize)
+                TotalPages = _paginationWrapper.GetTotalPages(searchResults.ToList(), pageSize)
             };
 
             return View(transactionsViewModel);

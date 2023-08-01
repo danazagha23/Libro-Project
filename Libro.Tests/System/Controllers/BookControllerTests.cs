@@ -10,6 +10,7 @@ using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Presentation.Controllers;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace Libro.Tests.Controllers
         private readonly Mock<IReadingListService> _readingListServiceMock;
         private readonly Mock<IReviewService> _reviewServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IPaginationWrapper<BookDTO>> _paginationWrapper;
         private readonly BooksController _booksController;
 
         public BooksControllerTests()
@@ -38,6 +40,7 @@ namespace Libro.Tests.Controllers
             _readingListServiceMock = new Mock<IReadingListService>();
             _reviewServiceMock = new Mock<IReviewService>();
             _mapperMock = new Mock<IMapper>();
+            _paginationWrapper = new Mock<IPaginationWrapper<BookDTO>>();
             _booksController = new BooksController(
                 _bookManagementServiceMock.Object,
                 _genreManagementServiceMock.Object,
@@ -45,7 +48,8 @@ namespace Libro.Tests.Controllers
                 _userManagementServiceMock.Object,
                 _readingListServiceMock.Object,
                 _mapperMock.Object,
-                _reviewServiceMock.Object
+                _reviewServiceMock.Object,
+                _paginationWrapper.Object
             );
         }
 
@@ -80,6 +84,8 @@ namespace Libro.Tests.Controllers
             _bookManagementServiceMock.Setup(b => b.FindBooksAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(searchResults);
             _authorManagementServiceMock.Setup(a => a.GetAllAuthorsAsync()).ReturnsAsync(authors);
             _genreManagementServiceMock.Setup(g => g.GetAllGenresAsync()).ReturnsAsync(genres);
+            _paginationWrapper.Setup(x => x.GetPage(searchResults, 1, 5)).Returns(searchResults);
+            _paginationWrapper.Setup(x => x.GetTotalPages(searchResults, 5)).Returns(1);
 
             var expectedModel = new SearchViewModel
             {

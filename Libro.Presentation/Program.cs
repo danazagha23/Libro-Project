@@ -8,6 +8,7 @@ using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
 using Libro.Infrastructure.Data.Repositories;
 using Libro.Presentation.Controllers;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -111,6 +112,8 @@ builder.Services.AddAuthorization();
 
 builder.Services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
 builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
+
+builder.Services.AddScoped(typeof(IPaginationWrapper<>), typeof(PaginationWrapper<>));
 
 // Add the OverdueBookCheckService as a singleton service
 builder.Services.AddSingleton<IHostedService, OverdueBookCheckService>();

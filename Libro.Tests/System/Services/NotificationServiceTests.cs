@@ -4,6 +4,7 @@ using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.RepositoriesInterfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Libro.Tests.Services
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<INotificationRepository> _notificationRepositoryMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<NotificationService>> _loggerMock;
         private readonly NotificationService _notificationService;
 
         public NotificationServiceTests()
@@ -26,7 +28,14 @@ namespace Libro.Tests.Services
             _emailServiceMock = new Mock<IEmailService>();
             _notificationRepositoryMock = new Mock<INotificationRepository>();
             _mapperMock = new Mock<IMapper>();
-            _notificationService = new NotificationService(_userRepositoryMock.Object, _emailServiceMock.Object, _notificationRepositoryMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<NotificationService>>();
+            _notificationService = new NotificationService
+                (_userRepositoryMock.Object,
+                _emailServiceMock.Object,
+                _notificationRepositoryMock.Object,
+                _mapperMock.Object,
+                _loggerMock.Object
+                );
         }
 
         [Fact]

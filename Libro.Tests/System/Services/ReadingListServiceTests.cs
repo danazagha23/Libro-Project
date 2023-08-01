@@ -4,6 +4,7 @@ using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Entities;
 using Libro.Domain.RepositoriesInterfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,19 @@ namespace Libro.Tests.Services
     {
         private readonly Mock<IReadingListRepository> _readingListRepositoryMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<ReadingListService>> _loggerMock;
         private readonly ReadingListService _readingListService;
 
         public ReadingListServiceTests()
         {
             _readingListRepositoryMock = new Mock<IReadingListRepository>();
             _mapperMock = new Mock<IMapper>();
-            _readingListService = new ReadingListService(_readingListRepositoryMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<ReadingListService>>();
+            _readingListService = new ReadingListService
+                (_readingListRepositoryMock.Object,
+                _mapperMock.Object,
+                _loggerMock.Object
+                );
         }
 
         [Fact]

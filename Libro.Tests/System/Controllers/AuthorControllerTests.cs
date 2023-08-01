@@ -2,6 +2,7 @@
 using Libro.Application.DTOs;
 using Libro.Application.ServicesInterfaces;
 using Libro.Presentation.Controllers;
+using Libro.Presentation.Helpers;
 using Libro.Presentation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -17,13 +18,19 @@ namespace Libro.Tests.Controllers
     {
         private readonly Mock<IAuthorManagementService> _authorServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IPaginationWrapper<AuthorDTO>> _paginationWrapper;
         private readonly AuthorsController _controller;
 
         public AuthorsControllerTests()
         {
             _authorServiceMock = new Mock<IAuthorManagementService>();
             _mapperMock = new Mock<IMapper>();
-            _controller = new AuthorsController(_authorServiceMock.Object, _mapperMock.Object);
+            _paginationWrapper = new Mock<IPaginationWrapper<AuthorDTO>>();
+            _controller = new AuthorsController
+                (_authorServiceMock.Object,
+                _mapperMock.Object,
+                _paginationWrapper.Object
+                );
         }
 
         [Fact]
@@ -38,6 +45,8 @@ namespace Libro.Tests.Controllers
             };
 
             _authorServiceMock.Setup(x => x.GetAllAuthorsAsync()).ReturnsAsync(authors);
+            _paginationWrapper.Setup(x => x.GetPage(authors, 1, 5)).Returns(authors);
+            _paginationWrapper.Setup(x => x.GetTotalPages(authors, 5)).Returns(1);
 
             var authorsViewModel = new AuthorsViewModel
             {
