@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Libro.Application.DTOs;
+using Libro.Application.Extensions;
 using Libro.Application.Services;
 using Libro.Application.ServicesInterfaces;
 using Libro.Presentation.Helpers;
@@ -31,7 +32,7 @@ namespace Libro.Presentation.Controllers
             ICollection<AuthorDTO> filteredAuthors;
             if (!string.IsNullOrEmpty(selectedAuthor))
             {
-                filteredAuthors = authors.Where(a => a.AuthorName.Contains(selectedAuthor)).ToList();
+                filteredAuthors = authors.Where(a => a.AuthorName.ContainsIgnoreCaseAndWhitespace(selectedAuthor)).ToList();
             }
             else
             {

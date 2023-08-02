@@ -1,4 +1,5 @@
-﻿using Libro.Domain.Entities;
+﻿using Libro.Application.Extensions;
+using Libro.Domain.Entities;
 using Libro.Domain.Enums;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
@@ -160,7 +161,7 @@ namespace Libro.Infrastructure.Data.Repositories
 
                 if (!string.IsNullOrEmpty(SelectedBook))
                 {
-                    transactions = transactions.Where(s => s.Book.Title!.Contains(SelectedBook)).ToList();
+                    transactions = transactions.Where(s => s.Book.Title!.ContainsIgnoreCaseAndWhitespace(SelectedBook)).ToList();
                 }
 
                 if (!string.IsNullOrEmpty(selectedType))

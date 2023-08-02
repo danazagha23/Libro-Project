@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Libro.Application.DTOs;
+using Libro.Application.Extensions;
 using Libro.Application.ServicesInterfaces;
 using Libro.Domain.Enums;
 using Libro.Presentation.Helpers;
@@ -55,7 +56,7 @@ namespace Libro.Presentation.Controllers
             ICollection<UserDTO> filteredPatrons;
             if (!string.IsNullOrEmpty(selectedPatron))
             {
-                filteredPatrons = patronsDTOs.Where(p => p.Username.Contains(selectedPatron)).ToList();
+                filteredPatrons = patronsDTOs.Where(p => p.Username.ContainsIgnoreCaseAndWhitespace(selectedPatron)).ToList();
             }
             else
             {
@@ -134,7 +135,7 @@ namespace Libro.Presentation.Controllers
             ICollection<UserDTO> filteredLibrarians;
             if (!string.IsNullOrEmpty(selectedLibrarian))
             {
-                filteredLibrarians = librarians.Where(p => p.Username.Contains(selectedLibrarian)).ToList();
+                filteredLibrarians = librarians.Where(p => p.Username.ContainsIgnoreCaseAndWhitespace(selectedLibrarian)).ToList();
             }
             else
             {
