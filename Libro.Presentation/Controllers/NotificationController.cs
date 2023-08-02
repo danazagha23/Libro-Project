@@ -9,12 +9,12 @@ using System.Data;
 
 namespace Libro.Presentation.Controllers
 {
-    public class LibrarianController : Controller
+    public class NotificationController : Controller
     {
         private readonly INotificationService _notificationService;
         private readonly IUserManagementService _userManagementService;
 
-        public LibrarianController(INotificationService notificationService, IUserManagementService userManagementService)
+        public NotificationController(INotificationService notificationService, IUserManagementService userManagementService)
         {
             _notificationService = notificationService;
             _userManagementService = userManagementService;

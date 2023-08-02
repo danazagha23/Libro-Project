@@ -1,4 +1,5 @@
 ﻿using Libro.Application.DTOs;
+using Libro.Application.Extensions;
 using Libro.Domain.Entities;
 using Libro.Domain.RepositoriesInterfaces;
 using Libro.Infrastructure.Data.DbContexts;
@@ -194,7 +195,7 @@ namespace Libro.Infrastructure.Data.Repositories
 
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    books = books.Where(s => s.Title!.Contains(searchString)).ToList();
+                    books = books.Where(s => s.Title!.ContainsIgnoreCaseAndWhitespace(searchString)).ToList();
                 }
 
                 if (!string.IsNullOrEmpty(bookGenre))
@@ -204,7 +205,7 @@ namespace Libro.Infrastructure.Data.Repositories
 
                 if (!string.IsNullOrEmpty(authorName))
                 {
-                    books = books.Where(x => x.BookAuthors.Any(ab => ab.Author.AuthorName.Contains(authorName))).ToList();
+                    books = books.Where(x => x.BookAuthors.Any(ab => ab.Author.AuthorName.ContainsIgnoreCaseAndWhitespace(authorName))).ToList();
                 }
 
                 if (!string.IsNullOrEmpty(availabilityStatus))
