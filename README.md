@@ -37,20 +37,13 @@ Libro is a comprehensive Book Management System designed to facilitate the easy 
 
 5. **Error Handling and Logging:** The system includes robust error handling mechanisms and logging functionality. This aids in debugging and maintaining the application.
 
-6. **Unit Testing (xUnit):** We employ xUnit, a testing framework, for writing and running unit tests. This ensures the reliability and stability of the codebase.
+6. **Unit Testing (xUnit):** I employ xUnit, a testing framework, for writing and running unit tests. This ensures the reliability and stability of the codebase.
 
-7. **Dependency Injection:** We utilize dependency injection to manage the flow of dependencies in the application. This promotes loose coupling and increases the flexibility of the system.
+7. **Dependency Injection:** I utilize dependency injection to manage the flow of dependencies in the application. This promotes loose coupling and increases the flexibility of the system.
 
 8. **Secure API Design:** The ASP.NET Core Web API follows best practices for secure API design, such as input validation and authorization checks, and output sanitization.
 
-9. **Database Migrations:** We use Entity Framework Core's migration feature to manage database schema changes. This simplifies database versioning and deployment.
-
-10. **Consistent Coding Style:** We adhere to a consistent coding style, following industry-standard conventions and guidelines. This fosters readability and maintainability among team members.
-
-11. **Version Control (Git):** The project is version-controlled using Git, ensuring proper collaboration, code review, and history tracking.
-
-12. **Documentation:** We prioritize clear and concise code documentation to aid understanding and maintainability.
-
+9. **Database Migrations:** I use Entity Framework Core's migration feature to manage database schema changes. This simplifies database versioning and deployment.
 
 ## Front-end: Razor Pages
 
